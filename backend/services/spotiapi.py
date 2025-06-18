@@ -41,11 +41,11 @@ def find_music(track: str):
     return {
         'title': result.get('name', 'Unknown Title'),
         'artist': artist_name,
-        'image': image_url,
         'album': album_name,
         'genre': genre,
         'date': formatted,
         'duration': duration,
+        'image': image_url,
     }
 
 
