@@ -4,7 +4,7 @@ from datetime import datetime
 from babel.dates import format_date
 
 today = datetime.today()
-formatted = format_date(today, format='d MMMM y г.', locale='ru')
+formatted = today.strftime('%Y-%m-%d')
 
 CLIENT_ID = "f346c618c8624f6791f35db57be1951a"
 CLIENT_SECRET = "e6feda1ca95449b4a22f246e571206ac"

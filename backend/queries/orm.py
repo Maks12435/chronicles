@@ -1,11 +1,12 @@
 from sqlalchemy import select, func, case, cast, String, distinct, Numeric
 from db import session_factory
-from models import Tracks, TracksTable
+from models import MovieTable, Tracks, TracksTable, FootballTable, TeamsTable
+from sqlalchemy.orm import aliased
 
 def select_tracks():
     with session_factory() as session:
         query = (
-            select(TracksTable).order_by(TracksTable.rank.desc())
+            select(TracksTable).order_by(TracksTable.rank.asc())
         )
 
         result = session.execute(query).scalars().all()
@@ -69,21 +70,77 @@ def swap_with_next_rank(track_id):
 
         next_track = (
             session.query(TracksTable)
-            .filter(TracksTable.rank > current_rank)
-            .order_by(TracksTable.rank.asc())
+            .filter(TracksTable.rank < current_rank)
+            .order_by(TracksTable.rank.desc())
             .first()
         )
 
         if not next_track:
             raise ValueError("No track with higher rank to swap with")
 
-        temp_rank = -1
-
-        current.rank = temp_rank
-        session.flush()  
-
-        current.rank = next_track.rank
-        next_track.rank = current_rank
+        current.rank, next_track.rank = next_track.rank, current_rank
 
         session.commit()
 
+
+
+
+def select_matches():
+    with session_factory() as session:
+        Team1 = aliased(TeamsTable)
+        Team2 = aliased(TeamsTable)
+
+        query = (
+            select(FootballTable, Team1, Team2)
+            .join(Team1, FootballTable.team1 == Team1.id)
+            .join(Team2, FootballTable.team2 == Team2.id)
+        )
+
+        result = session.execute(query).all()
+
+        return [
+            {
+                "id": match.id,
+                "score": match.score,
+                "date": match.date,
+                "stadium": match.stadium,
+                "tournament": match.tournament,
+                "image": match.image,
+                "stage": match.stage,
+                "team1": {
+                    "name": team1.name,
+                    "logo": team1.logo
+                },
+                "team2": {
+                    "name": team2.name,
+                    "logo": team2.logo
+                }
+            }
+            for match, team1, team2 in result
+        ]
+
+
+def select_movies():
+    with session_factory() as session:
+        query = select(MovieTable)
+        result = session.execute(query)
+        movies = result.scalars().all()
+
+        return [movie for movie in movies]
+
+def insert_movie(movie):
+    with session_factory() as session:
+        track_data = movie.dict()
+
+        session.add(MovieTable(**track_data))
+        session.commit()
+
+def delete_movie(movie_id):
+    with session_factory() as session:
+        movie = session.get(MovieTable, movie_id)
+        if movie:
+            session.delete(movie)
+            session.commit()
+            return {"message": "movie deleted"}
+        else:
+            return {"error": "movie not found"}

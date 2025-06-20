@@ -16,7 +16,7 @@ import { useEffect, useState } from 'react'
 import { BarChart, Bar, PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer, XAxis, YAxis } from 'recharts'
 import { Label } from '@/components/ui/label'
 import axios from 'axios'
-import type { TrackType } from '@/static/types'
+import type { MovieType } from '@/static/types'
 import type { ArtistCountType } from '@/static/types'
 import {
     Pagination,
@@ -27,94 +27,80 @@ import {
     PaginationPrevious,
 } from '../ui/pagination'
 import { Select, SelectValue, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger } from '../ui/select'
+import { useNavigate } from '@tanstack/react-router'
 
 const COLORS = ['rgb(3, 71, 134)', 'rgb(21, 85, 176)', 'rgb(79, 132, 205)', 'rgb(129, 160, 204)']
 
-export default function MusicStatistics() {
+export default function ShowStatistics() {
     const [showData, setShowData] = useState(false)
     const [editMode, setEditMode] = useState(false)
-    const [rows, setRows] = useState<TrackType[]>([])
-    const [findingTrack, setFindingTrack] = useState<TrackType | null>(null)
-    const [trackName, setTrackName] = useState('')
-    const [genresCount, setGenresCount] = useState([])
-    const [artistsCount, setArtistsCount] = useState<ArtistCountType[]>([])
+    const [movieName, setmovieName] = useState('')
     const [selectedYear, setSelectedYear] = useState('2025')
 
+    const [moviesAll, setMoviesAll] = useState<MovieType[]>([])
+    const [movies, setMovies] = useState<MovieType[]>([])
+    const [findingMovie, setFindingMovie] = useState<MovieType | null>(null)
+
     const ITEMS_PER_PAGE = 10
-    const totalPages = Math.ceil(rows.length / ITEMS_PER_PAGE)
+    const totalPages = Math.ceil(moviesAll.length / ITEMS_PER_PAGE)
     const [page, setPage] = useState(1)
-    const paginatedData = rows.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE)
+    const paginatedData = moviesAll.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE)
 
-    const fetchTracks = async () => {
-        try {
-            const response = await axios.get(`http://127.0.0.1:8000/get_tracks`)
-            setRows(response.data)
-        } catch (error: any) {
-            console.log(error.message)
-        }
-    }
+    const navigate = useNavigate()
 
-    const fetchGenresCount = async () => {
+    const fetchMovies = async () => {
         try {
-            const response = await axios.get(`http://127.0.0.1:8000/get_genres`)
-            setGenresCount(response.data)
+            const response = await axios.get<MovieType[]>(`http://127.0.0.1:8000/get_movies`)
+            setMoviesAll(response.data)
+            setMovies(response.data)
         } catch (error: any) {
-            console.log(error.message)
-        }
-    }
-
-    const fetchArtistsCount = async () => {
-        try {
-            const response = await axios.get(`http://127.0.0.1:8000/get_artists`)
-            setArtistsCount(response.data)
-        } catch (error: any) {
-            console.log(error.message)
+            console.error(error.message)
         }
     }
 
     useEffect(() => {
-        fetchTracks()
-        fetchGenresCount()
-        fetchArtistsCount()
+        fetchMovies()
     }, [])
 
-    const handleDelete = async (track_id: number) => {
+    const filterMovies = (movie_name: string) => {
+        const filtered = moviesAll.filter((item) => item.title.toLowerCase().includes(movie_name.toLowerCase()))
+        setMovies(filtered)
+        console.log(movies)
+    }
+
+    const handleDelete = async (movie_id: number) => {
         try {
-            await axios.post(`http://127.0.0.1:8000/delete_track?track_id=${track_id}`)
-            fetchTracks()
-            fetchGenresCount()
-            fetchArtistsCount()
+            await axios.post(`http://127.0.0.1:8000/delete_movie?movie_id=${movie_id}`)
+            fetchMovies()
         } catch (error: any) {
             console.log(error.message)
         }
     }
 
-    const handleAdd = async (track: TrackType | null) => {
+    const handleAdd = async (movie: MovieType | null) => {
         try {
-            const response = await axios.post(`http://127.0.0.1:8000/add_track`, track)
+            const response = await axios.post(`http://127.0.0.1:8000/add_movie`, movie)
             alert(response.status)
-            fetchTracks()
-            fetchGenresCount()
-            fetchArtistsCount()
+            fetchMovies()
         } catch (error: any) {
             console.log(error.message)
         }
     }
 
-    const handleTrackSearch = async (track_name: string) => {
+    const handleMovieSearch = async (movie_name: string) => {
         try {
-            const response = await axios.post(`http://127.0.0.1:8000/music_search?track_name=${track_name}`)
-            setFindingTrack(response.data)
+            const response = await axios.get(`http://127.0.0.1:8000/movie_search?movie_name=${movie_name}`)
+            setFindingMovie(response.data)
         } catch (error: any) {
             console.log(error.message)
         }
     }
 
-    const handleSwapRank = async (track_id: number) => {
+    const handleSwapRank = async (movie_id: number) => {
         try {
-            await axios.post(`http://127.0.0.1:8000/swap-rank?track_id=${track_id}`)
+            await axios.post(`http://127.0.0.1:8000/swap-rank?movie_id=${movie_id}`)
 
-            fetchTracks()
+            fetchMovies()
         } catch (error: any) {
             console.error('Ошибка при свапе:', error.response?.data?.detail || error.message)
         }
@@ -125,25 +111,33 @@ export default function MusicStatistics() {
             <div className="grid grid-cols-10 gap-x-4">
                 <div className="col-span-5">
                     <div className="relative">
-                        <img src={selectedYear === '2025' ? "/assets/images/chaewon2.png" : selectedYear === '2024' ? "/assets/images/chaeyoung.png" : 'none'} alt="stars" className="w-full" />
+                        <img
+                            src={
+                                selectedYear === '2025'
+                                    ? '/assets/images/movies.png'
+                                    : selectedYear === '2024'
+                                    ? '/assets/images/movies.png'
+                                    : 'none'
+                            }
+                            alt="stars"
+                            className="w-full"
+                        />
                         <div className="flex flex-col">
                             <div className="absolute bottom-0 w-full pb-8" style={{ fontFamily: 'Staatliches' }}>
-                                <h3 className="text-7xl font-bold tracking-wider text-nowrap text-zinc-300">
-                                    Best artists and music
+                                <h3 className="text-7xl font-bold movieing-wider text-nowrap text-zinc-300">
+                                    Best movies and series
                                 </h3>
                                 <div className="flex gap-x-8">
-                                    <h4>Le Sserafim</h4>
-                                    <h4>Twice</h4>
-                                    <h4>Babymonster</h4>
-                                    <h4>Clean Bandit</h4>
-                                    <h4>Zivert</h4>
-                                    <h4>I-dle</h4>
+                                    <h4>Breaking bad</h4>
+                                    <h4>Squid game 2</h4>
+                                    <h4>Green elephant</h4>
+                                    <h4>parasite</h4>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div className="col-span-5 tracking-widest text-primary flex flex-col justify-between gap-y-4">
+                <div className="col-span-5 movieing-widest text-primary flex flex-col justify-between gap-y-4">
                     <div className="flex justify-end">
                         <Select onValueChange={(value) => setSelectedYear(value)}>
                             <SelectTrigger className="border-none bg-transparent [&>svg]:hidden">
@@ -162,16 +156,16 @@ export default function MusicStatistics() {
                     <Table>
                         <TableBody className="text-md">
                             <TableRow>
-                                <TableCell>Artist of the Year</TableCell>
-                                <TableCell>Le Sserafim</TableCell>
+                                <TableCell>Movie of the year</TableCell>
+                                <TableCell>Parasite</TableCell>
                             </TableRow>
                             <TableRow>
-                                <TableCell>The song of the yaer</TableCell>
-                                <TableCell>HOT - Le Sserafim</TableCell>
+                                <TableCell>Series of the year</TableCell>
+                                <TableCell>Breaking bad</TableCell>
                             </TableRow>
                             <TableRow>
-                                <TableCell>The best new artist of the year</TableCell>
-                                <TableCell>Meovv</TableCell>
+                                <TableCell>Character of thr year</TableCell>
+                                <TableCell>Gustavo Fring</TableCell>
                             </TableRow>
                             <TableRow>
                                 <TableCell>Clip of the year</TableCell>
@@ -194,7 +188,7 @@ export default function MusicStatistics() {
                         <div className="col-span-7">
                             <div className="flex justify-between px-2 items-center">
                                 <h3 className="text-lg leading-tight" style={{ fontFamily: 'Staatliches' }}>
-                                    Top 20 best songs of this year
+                                    List of the best movies of this year
                                 </h3>
                                 <div className="px-5 flex items-center gap-x-2">
                                     <Dialog>
@@ -203,15 +197,15 @@ export default function MusicStatistics() {
                                                 className="text-sm py-1 px-4 font-medium cursor-pointer bg-zinc-900 hover:bg-zinc-800 text-primary"
                                                 style={{ fontFamily: 'Roboto' }}
                                             >
-                                                Add new song
+                                                Add new movie
                                             </button>
                                         </DialogTrigger>
 
                                         <DialogContent>
                                             <DialogHeader>
-                                                <DialogTitle>Song search</DialogTitle>
+                                                <DialogTitle>Movie search</DialogTitle>
                                                 <DialogDescription>
-                                                    Type song name that you want to find
+                                                    Type movie name that you want to find
                                                 </DialogDescription>
                                             </DialogHeader>
 
@@ -219,44 +213,45 @@ export default function MusicStatistics() {
                                             <div className="relative">
                                                 <Input
                                                     id="title"
-                                                    placeholder="Song title"
-                                                    value={trackName}
-                                                    onChange={(e) => setTrackName(e.target.value)}
+                                                    placeholder="movie title"
+                                                    value={movieName}
+                                                    onChange={(e) => setmovieName(e.target.value)}
                                                     onKeyDown={(e) => {
                                                         if (e.key === 'Enter') {
-                                                            handleTrackSearch(trackName)
+                                                            handleMovieSearch(movieName)
                                                         }
                                                     }}
                                                 />
                                                 <button
                                                     type="button"
                                                     className="absolute right-2 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-primary"
-                                                    onClick={() => handleTrackSearch(trackName)}
+                                                    onClick={() => handleMovieSearch(movieName)}
                                                 >
                                                     <Search className="w-4 h-4" />
                                                 </button>
                                             </div>
 
+                                            {findingMovie && (
+                                                <div className="flex flex-col items-center gap-y-2">
+                                                    <img
+                                                        src={`https://image.tmdb.org/t/p/w500${findingMovie.image}`}
+                                                        alt="movie"
+                                                        width={'160px'}
+                                                        className="rounded-md"
+                                                    />
+                                                    <h4 className="font-semibold text-xl">
+                                                        {findingMovie.original_title}
+                                                    </h4>
+                                                    <h5 className="text-zinc-400">{findingMovie.genre}</h5>
+                                                </div>
+                                            )}
                                             <Button
                                                 type="button"
                                                 className="bg-zinc-900 text-primary"
-                                                onClick={() => handleAdd(findingTrack)}
+                                                onClick={() => handleAdd(findingMovie)}
                                             >
                                                 Add
                                             </Button>
-
-                                            {findingTrack && (
-                                                <div className="flex flex-col items-center">
-                                                    <img
-                                                        src={findingTrack.image}
-                                                        alt="track"
-                                                        width={96}
-                                                        className="rounded-md"
-                                                    />
-                                                    <h4 className="font-semibold text-xl">{findingTrack.title}</h4>
-                                                    <h5 className="text-zinc-400">{findingTrack.artist}</h5>
-                                                </div>
-                                            )}
                                         </DialogContent>
                                     </Dialog>
 
@@ -269,14 +264,9 @@ export default function MusicStatistics() {
                             <Table>
                                 <TableHeader>
                                     <TableHead>#</TableHead>
-                                    <TableHead>Название</TableHead>
-                                    <TableHead>Альбом</TableHead>
-                                    <TableHead>Дата добавления</TableHead>
-                                    <TableHead>
-                                        <div className="flex justify-center items-center">
-                                            <Clock className="w-4" />
-                                        </div>
-                                    </TableHead>
+                                    <TableHead>Описание</TableHead>
+                                    <TableHead>Дата выхода</TableHead>
+                                    <TableHead>Рейтинги</TableHead>
                                     {editMode && (
                                         <>
                                             <TableHead>
@@ -289,33 +279,52 @@ export default function MusicStatistics() {
                                     )}
                                 </TableHeader>
                                 <TableBody>
-                                    {paginatedData.map((song, index) => (
+                                    {paginatedData.map((movie, index) => (
                                         <TableRow key={index}>
                                             <TableCell>{(page - 1) * ITEMS_PER_PAGE + index + 1}</TableCell>
-                                            <TableCell>
+                                            <TableCell className="">
                                                 <div className="flex gap-x-2 items-center">
-                                                    <img src={song.image} alt="audio" className="w-12 rounded-sm" />
+                                                    <img
+                                                        src={`https://image.tmdb.org/t/p/w500${movie.image}`}
+                                                        alt="audio"
+                                                        className="w-12 rounded-sm"
+                                                    />
                                                     <div className="flex flex-col">
-                                                        <h4 className="font-medium text-lg">{song.title}</h4>
-                                                        <h4 className="font-medium text-zinc-400">{song.artist}</h4>
+                                                        <h4 className="font-medium text-lg text-ellipsis whitespace-nowrap overflow-hidden max-w-[480px]">
+                                                            {movie.title} ({movie.original_title})
+                                                        </h4>
+                                                        <h4 className="font-medium text-zinc-300">{movie.tagline}</h4>
+                                                        <h4 className="font-light text-zinc-400">
+                                                            Жанр: {movie.genre}
+                                                        </h4>
                                                     </div>
                                                 </div>
                                             </TableCell>
-                                            <TableCell>{song.album}</TableCell>
-                                            <TableCell>{song.date}</TableCell>
-                                            <TableCell className="text-center">{song.duration}</TableCell>
+                                            <TableCell>
+                                                {movie.release_date}, ({movie.country})
+                                            </TableCell>
+                                            <TableCell>
+                                                <div className="flex flex-col gap-y-2">
+                                                    <div className="bg-gradient-to-bl from-[#002a85] via-[#004cc6] to-[#002185] px-2 rounded-full w-20 text-center font-semibold">
+                                                        {movie.rating}
+                                                    </div>
+                                                    <div className="bg-gradient-to-bl from-cyan-950 via-cyan-700 to-cyan-900 px-2 rounded-full w-20 text-center font-semibold">
+                                                        {movie.personal_rating == null ? '???' : movie.personal_rating}
+                                                    </div>
+                                                </div>
+                                            </TableCell>
                                             {editMode && (
                                                 <>
                                                     <TableCell>
                                                         <Trash2
                                                             className="text-red-500 hover:text-red-700 cursor-pointer w-4"
-                                                            onClick={() => handleDelete(song.id)}
+                                                            onClick={() => handleDelete(movie.id)}
                                                         />
                                                     </TableCell>
                                                     <TableCell>
                                                         <ChevronUp
                                                             className="w-5 cursor-pointer"
-                                                            onClick={() => handleSwapRank(song.id)}
+                                                            onClick={() => handleSwapRank(movie.id)}
                                                         />
                                                         <ChevronDown className="w-5 h-5 cursor-pointer" />
                                                     </TableCell>
@@ -350,79 +359,6 @@ export default function MusicStatistics() {
                                     </PaginationItem>
                                 </PaginationContent>
                             </Pagination>
-                        </div>
-                        <div className="col-span-3">
-                            <h3 className="text-lg leading-tight px-4 py-1" style={{ fontFamily: 'Staatliches' }}>
-                                Diagram data
-                            </h3>
-                            <Separator className="h-[1px] bg-zinc-800 my-2 mb-4" />
-
-                            <div className="flex flex-col gap-y-4">
-                                <ResponsiveContainer width="100%" height={200}>
-                                    <PieChart>
-                                        <Pie
-                                            data={genresCount}
-                                            dataKey="count"
-                                            nameKey="genre"
-                                            innerRadius="70%"
-                                            outerRadius="100%"
-                                            paddingAngle={0}
-                                            stroke="none"
-                                        >
-                                            {genresCount.map((entry, index) => (
-                                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                                            ))}
-                                        </Pie>
-                                        <Legend
-                                            layout="vertical"
-                                            verticalAlign="middle"
-                                            align="right"
-                                            iconType="square"
-                                            wrapperStyle={{
-                                                paddingLeft: '12px',
-                                                lineHeight: '42px',
-                                                fontSize: '12px',
-                                                whiteSpace: 'normal',
-                                                overflowWrap: 'break-word',
-                                            }}
-                                        />
-                                    </PieChart>
-                                </ResponsiveContainer>
-
-                                <ResponsiveContainer width="100%" height={300}>
-                                    <BarChart
-                                        data={artistsCount}
-                                        layout="vertical"
-                                        margin={{ top: 20, right: 30, left: 10, bottom: 20 }}
-                                    >
-                                        <XAxis type="number" />
-                                        <YAxis type="category" dataKey="artist" hide /> <Tooltip />
-                                        <Bar
-                                            dataKey="count"
-                                            fill="#8884d8"
-                                            radius={[0, 5, 5, 0]}
-                                            label={({ x, y, height, index }) => {
-                                                const artist = artistsCount[index].artist
-                                                return (
-                                                    <text
-                                                        x={x + 5}
-                                                        y={y! + height / 2}
-                                                        fill="white"
-                                                        fontSize={12}
-                                                        alignmentBaseline="middle"
-                                                    >
-                                                        {artist}
-                                                    </text>
-                                                )
-                                            }}
-                                        >
-                                            {artistsCount.map((entry, index) => (
-                                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                                            ))}
-                                        </Bar>
-                                    </BarChart>
-                                </ResponsiveContainer>
-                            </div>
                         </div>
                     </div>
                 </>
