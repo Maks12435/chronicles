@@ -2,14 +2,14 @@ from datetime import date
 from typing import Optional
 from pydantic import BaseModel
 from db import Base
-from sqlalchemy import String, Integer, Column, CheckConstraint, Text, Numeric, Date
+from sqlalchemy import String, Integer, Column, CheckConstraint, Text, Numeric, Date, UniqueConstraint, Computed
 
 class Tracks(BaseModel):
     title: str
     artist: str
     album: str
     genre: str
-    date: str
+    date: date
     duration: str  
     image: str
 
@@ -46,13 +46,16 @@ class TracksTable(Base):
     artist = Column(String)
     album = Column(String)
     genre = Column(String)
-    date = Column(String)
+    date = Column(Date)
     duration = Column(String)  
     image = Column(String)
-    rank = Column(Integer, unique=True)
+    rank = Column(Integer)  
+    year = Column(Integer, Computed("EXTRACT(YEAR FROM date) STORED")) 
+
 
     __table_args__ = (
-        CheckConstraint('rank BETWEEN 1 AND 20', name='rank_between_1_20'),
+        UniqueConstraint('rank', 'year', name='unique_rank_per_year'),
+        CheckConstraint('(rank BETWEEN 1 AND 30) OR rank = -1', name='tracks_rank_check'),
     )
 
 class FootballTable(Base):

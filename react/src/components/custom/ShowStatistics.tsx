@@ -1,4 +1,3 @@
-import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import {
     Dialog,
@@ -12,12 +11,9 @@ import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { ChevronDown, ChevronUp, Clock, Edit, Repeat, Search, Trash2 } from 'lucide-react'
-import { useEffect, useState } from 'react'
-import { BarChart, Bar, PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer, XAxis, YAxis } from 'recharts'
 import { Label } from '@/components/ui/label'
 import axios from 'axios'
 import type { MovieType } from '@/static/types'
-import type { ArtistCountType } from '@/static/types'
 import {
     Pagination,
     PaginationContent,
@@ -27,51 +23,41 @@ import {
     PaginationPrevious,
 } from '../ui/pagination'
 import { Select, SelectValue, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger } from '../ui/select'
-import { useNavigate } from '@tanstack/react-router'
-
-const COLORS = ['rgb(3, 71, 134)', 'rgb(21, 85, 176)', 'rgb(79, 132, 205)', 'rgb(129, 160, 204)']
+import { fetchMovies } from '@/api/shows'
+import { useState } from 'react'
+import { BASE_URL } from '@/static/urls'
+import { useQuery } from '@tanstack/react-query'
+import toast from 'react-hot-toast'
 
 export default function ShowStatistics() {
     const [showData, setShowData] = useState(false)
     const [editMode, setEditMode] = useState(false)
     const [movieName, setmovieName] = useState('')
     const [selectedYear, setSelectedYear] = useState('2025')
-
-    const [moviesAll, setMoviesAll] = useState<MovieType[]>([])
-    const [movies, setMovies] = useState<MovieType[]>([])
     const [findingMovie, setFindingMovie] = useState<MovieType | null>(null)
 
+    const {
+        data: movies = [],
+        isLoading: moviesLoading,
+        isError: moviesError,
+        refetch: refetchMovies,
+    } = useQuery<MovieType[]>({
+        queryKey: ['movies', selectedYear],
+        queryFn: () => fetchMovies(),
+        enabled: showData,
+        placeholderData: (prev) => prev,
+    })
+
     const ITEMS_PER_PAGE = 10
-    const totalPages = Math.ceil(moviesAll.length / ITEMS_PER_PAGE)
+    const totalPages = Math.ceil(movies.length / ITEMS_PER_PAGE)
     const [page, setPage] = useState(1)
-    const paginatedData = moviesAll.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE)
-
-    const navigate = useNavigate()
-
-    const fetchMovies = async () => {
-        try {
-            const response = await axios.get<MovieType[]>(`http://127.0.0.1:8000/get_movies`)
-            setMoviesAll(response.data)
-            setMovies(response.data)
-        } catch (error: any) {
-            console.error(error.message)
-        }
-    }
-
-    useEffect(() => {
-        fetchMovies()
-    }, [])
-
-    const filterMovies = (movie_name: string) => {
-        const filtered = moviesAll.filter((item) => item.title.toLowerCase().includes(movie_name.toLowerCase()))
-        setMovies(filtered)
-        console.log(movies)
-    }
+    const paginatedData = movies.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE)
 
     const handleDelete = async (movie_id: number) => {
         try {
-            await axios.post(`http://127.0.0.1:8000/delete_movie?movie_id=${movie_id}`)
-            fetchMovies()
+            await axios.post(`${BASE_URL}/delete_movie?movie_id=${movie_id}`)
+            await refetchMovies()
+            toast.success('Фильм успешно удален')
         } catch (error: any) {
             console.log(error.message)
         }
@@ -79,9 +65,9 @@ export default function ShowStatistics() {
 
     const handleAdd = async (movie: MovieType | null) => {
         try {
-            const response = await axios.post(`http://127.0.0.1:8000/add_movie`, movie)
-            alert(response.status)
-            fetchMovies()
+            const response = await axios.post(`${BASE_URL}/add_movie`, movie)
+            await refetchMovies()
+            toast.success('Фильм успешно добавлен')
         } catch (error: any) {
             console.log(error.message)
         }
@@ -89,7 +75,7 @@ export default function ShowStatistics() {
 
     const handleMovieSearch = async (movie_name: string) => {
         try {
-            const response = await axios.get(`http://127.0.0.1:8000/movie_search?movie_name=${movie_name}`)
+            const response = await axios.get(`${BASE_URL}/movie_search?movie_name=${movie_name}`)
             setFindingMovie(response.data)
         } catch (error: any) {
             console.log(error.message)
@@ -98,9 +84,8 @@ export default function ShowStatistics() {
 
     const handleSwapRank = async (movie_id: number) => {
         try {
-            await axios.post(`http://127.0.0.1:8000/swap-rank?movie_id=${movie_id}`)
-
-            fetchMovies()
+            await axios.post(`${BASE_URL}/swap-rank?movie_id=${movie_id}`)
+            await refetchMovies()
         } catch (error: any) {
             console.error('Ошибка при свапе:', error.response?.data?.detail || error.message)
         }
@@ -114,9 +99,9 @@ export default function ShowStatistics() {
                         <img
                             src={
                                 selectedYear === '2025'
-                                    ? '/assets/images/movies.png'
+                                    ? '/assets/images/movies.webp'
                                     : selectedYear === '2024'
-                                    ? '/assets/images/movies.png'
+                                    ? '/assets/images/movies.webp'
                                     : 'none'
                             }
                             alt="stars"
@@ -167,14 +152,14 @@ export default function ShowStatistics() {
                                 <TableCell>Character of thr year</TableCell>
                                 <TableCell>Gustavo Fring</TableCell>
                             </TableRow>
-                            <TableRow>
-                                <TableCell>Clip of the year</TableCell>
-                                <TableCell>Hands up - Meovv</TableCell>
-                            </TableRow>
                         </TableBody>
                     </Table>
                     <div className="flex justify-end pb-8">
-                        <button onClick={() => setShowData(!showData)}>
+                        <button
+                            onClick={() => {
+                                setShowData(!showData), fetchMovies()
+                            }}
+                        >
                             {showData ? <ChevronUp /> : <ChevronDown />}
                         </button>
                     </div>
@@ -243,6 +228,18 @@ export default function ShowStatistics() {
                                                         {findingMovie.original_title}
                                                     </h4>
                                                     <h5 className="text-zinc-400">{findingMovie.genre}</h5>
+                                                    <Input
+                                                        type="number"
+                                                        max={10} 
+                                                        min={0}
+                                                        step={0.05}
+                                                        onChange={(e) =>
+                                                            setFindingMovie({
+                                                                ...findingMovie,
+                                                                personal_rating: Number(e.target.value),
+                                                            })
+                                                        }
+                                                    />
                                                 </div>
                                             )}
                                             <Button

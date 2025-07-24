@@ -31,6 +31,11 @@ export type ArtistCountType = {
     count: number
 }
 
+export type GenresCountType = {
+    genre: string
+    count: number
+}
+
 export type MovieType = {
     id: number
     title: string

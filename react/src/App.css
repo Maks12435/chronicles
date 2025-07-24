@@ -122,7 +122,8 @@
 }
 
 .container {
-  max-width: 1200px;
+  max-width: 1240px;
+  padding-inline: 16px;
 }
 
 @font-face {
@@ -135,6 +136,13 @@
 @font-face {
     font-family: 'Geist';
     src: url('/fonts/Geist-Regular.woff2') format('woff2');
+    font-weight: 400;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Staatliches';
+    src: url('/fonts/Staatliches-Regular.woff2') format('woff2');
     font-weight: 400;
     font-display: swap;
 }

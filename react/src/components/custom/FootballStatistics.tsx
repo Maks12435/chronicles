@@ -1,5 +1,4 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
+import { Card, CardContent, CardDescription, CardHeader } from '@/components/ui/card'
 import {
     Dialog,
     DialogContent,
@@ -8,51 +7,35 @@ import {
     DialogDescription,
     DialogTitle,
 } from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { ChevronDown, ChevronUp, Clock, Dot, Edit, Repeat, Search, Trash2 } from 'lucide-react'
-import { useEffect, useState } from 'react'
-import { BarChart, Bar, PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer, XAxis, YAxis } from 'recharts'
+import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table'
+import { ChevronDown, ChevronUp, Dot, Edit } from 'lucide-react'
+import { useState } from 'react'
 import { Label } from '@/components/ui/label'
-import axios from 'axios'
-import type { FootballMatchType, TrackType, TeamInfo } from '@/static/types'
-import type { ArtistCountType } from '@/static/types'
-import {
-    Pagination,
-    PaginationContent,
-    PaginationItem,
-    PaginationLink,
-    PaginationNext,
-    PaginationPrevious,
-} from '../ui/pagination'
+import { fetchMatches } from '@/api/football'
+import type { FootballMatchType } from '@/static/types'
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel'
 import { Select, SelectValue, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger } from '../ui/select'
+import { useQuery } from '@tanstack/react-query'
+import { FootballTotal } from '@/static/localdb'
 
 export default function FootballStatistics() {
     const [showData, setShowData] = useState(false)
     const [editMode, setEditMode] = useState(false)
-    const [rows, setRows] = useState<FootballMatchType[]>([])
-    const [trackName, setTrackName] = useState('')
-
-    const ITEMS_PER_PAGE = 10
-    const totalPages = Math.ceil(rows.length / ITEMS_PER_PAGE)
-    const [page, setPage] = useState(1)
-    const paginatedData = rows.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE)
     const [selectedYear, setSelectedYear] = useState('2025')
+    const ITEMS_PER_PAGE = 10
 
-    const fetchMatches = async () => {
-        try {
-            const response = await axios.get(`http://127.0.0.1:8000/get_matches`)
-            setRows(response.data)
-        } catch (error: any) {
-            console.log(error.message)
-        }
-    }
-
-    useEffect(() => {
-        fetchMatches()
-    }, [])
+    const {
+        data: football = [],
+        isLoading,
+        isError,
+        refetch: refetchData,
+    } = useQuery<FootballMatchType[]>({
+        queryKey: ['football'],
+        queryFn: () => fetchMatches(),
+        enabled: showData,
+        placeholderData: (prev) => prev,
+    })
 
     return (
         <>
@@ -77,34 +60,51 @@ export default function FootballStatistics() {
                         <TableBody className="text-md">
                             <TableRow>
                                 <TableCell>Team of the season</TableCell>
-                                <TableCell>Barcelona</TableCell>
+                                <TableCell>{FootballTotal[selectedYear].team}</TableCell>
                             </TableRow>
                             <TableRow>
                                 <TableCell>Player of the season</TableCell>
-                                <TableCell>Raphinia</TableCell>
+                                <TableCell>{FootballTotal[selectedYear].player}</TableCell>
                             </TableRow>
                             <TableRow>
                                 <TableCell>Coach of the season</TableCell>
-                                <TableCell>Hansi Flick</TableCell>
+                                <TableCell>{FootballTotal[selectedYear].coach}</TableCell>
                             </TableRow>
                             <TableRow>
                                 <TableCell>Match of the season</TableCell>
                                 <TableCell>
-                                    Barcelona 3:2 Real Madrid <br />
-                                    (Copa del Rey final)
+                                    <p
+                                        dangerouslySetInnerHTML={{
+                                            __html: FootballTotal['2025'].match.replace(/\n/g, '<br />'),
+                                        }}
+                                    />
                                 </TableCell>
                             </TableRow>
                         </TableBody>
                     </Table>
                     <div className="flex pb-8">
-                        <button onClick={() => setShowData(!showData)}>
+                        <button
+                            onClick={() => {
+                                setShowData(!showData), fetchMatches()
+                            }}
+                        >
                             {showData ? <ChevronUp /> : <ChevronDown />}
                         </button>
                     </div>
                 </div>
                 <div className="col-span-5">
                     <div className="relative">
-                        <img src={selectedYear === '2025' ? "/assets/images/football.png" : selectedYear === '2024' ? "/assets/images/football2.png" : 'none'} alt="stars" className="w-full" />
+                        <img
+                            src={
+                                selectedYear === '2025'
+                                    ? '/assets/images/football.webp'
+                                    : selectedYear === '2024'
+                                    ? '/assets/images/football2.webp'
+                                    : 'none'
+                            }
+                            alt="stars"
+                            className="w-full"
+                        />
                         <div className="flex flex-col">
                             <div className="absolute bottom-0 w-full pb-8" style={{ fontFamily: 'Staatliches' }}>
                                 <h3
@@ -174,20 +174,70 @@ export default function FootballStatistics() {
                                 className="w-full"
                             >
                                 <CarouselContent>
-                                    {paginatedData.map((match, index) => (
+                                    {football.map((match, index) => (
                                         <CarouselItem className="basis-1/4">
-                                            <Card className="bg-gradient-to-t from-[#001d2ccc] via-transparent to-transparent border-zinc-800 gap-y-2">
-                                                <CardHeader>
-                                                    <CardDescription className="flex items-center justify-center">
-                                                        {match.tournament} <Dot /> {match.date}
-                                                    </CardDescription>
-                                                </CardHeader>
-                                                <CardContent>
+                                            <Dialog>
+                                                <DialogTrigger>
+                                                    <Card className="bg-gradient-to-t from-[#001d2ccc] via-transparent to-transparent border-zinc-800 gap-y-2">
+                                                        <CardHeader>
+                                                            <CardDescription className="flex items-center justify-center">
+                                                                {match.tournament} <Dot /> {match.date}
+                                                            </CardDescription>
+                                                        </CardHeader>
+                                                        <CardContent>
+                                                            <div className="flex flex-col gap-y-4 items-center">
+                                                                <img
+                                                                    src={match.image}
+                                                                    alt="audio"
+                                                                    className="w-48 rounded-sm object-cover aspect-square"
+                                                                />
+                                                                <div className="grid grid-cols-10 gap-x-4 items-center">
+                                                                    <div className="col-span-4">
+                                                                        <div className="flex flex-col items-center gap-y-1">
+                                                                            <img
+                                                                                src={match.team1.logo}
+                                                                                alt="team1"
+                                                                                className="h-10"
+                                                                            />
+                                                                            <h4 className="text-md">
+                                                                                {match.team1.name}
+                                                                            </h4>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div className="col-span-2">
+                                                                        <div className="flex flex-col items-center">
+                                                                            <h4 className="font-medium text-2xl text-center">
+                                                                                {match.score}
+                                                                            </h4>
+                                                                            <div className="text-center text-zinc-500 text-[12px] whitespace-nowrap">
+                                                                                {match.stage}
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div className="col-span-4">
+                                                                        <div className="flex flex-col items-center gap-y-1">
+                                                                            <img
+                                                                                src={match.team2.logo}
+                                                                                alt="team2"
+                                                                                className="h-10"
+                                                                            />
+                                                                            <h4 className="text-md text-wrap">
+                                                                                {match.team2.name}
+                                                                            </h4>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </CardContent>
+                                                    </Card>
+                                                </DialogTrigger>
+                                                <DialogContent>
+                                                    <DialogHeader></DialogHeader>
                                                     <div className="flex flex-col gap-y-4 items-center">
                                                         <img
                                                             src={match.image}
                                                             alt="audio"
-                                                            className="w-48 rounded-sm object-cover aspect-square"
+                                                            className="w-64 rounded-sm object-cover aspect-square"
                                                         />
                                                         <div className="grid grid-cols-10 gap-x-4 items-center">
                                                             <div className="col-span-4">
@@ -224,8 +274,8 @@ export default function FootballStatistics() {
                                                             </div>
                                                         </div>
                                                     </div>
-                                                </CardContent>
-                                            </Card>
+                                                </DialogContent>
+                                            </Dialog>
                                         </CarouselItem>
                                     ))}
                                 </CarouselContent>

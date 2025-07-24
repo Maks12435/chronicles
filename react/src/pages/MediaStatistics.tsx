@@ -1,6 +1,5 @@
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { useNavigate } from '@tanstack/react-router'
 import MusicStatistics from '@/components/custom/MusicStatistics'
 import { Music2 } from 'lucide-react'
@@ -34,5 +33,3 @@ export default function MediaStatistics() {
         </>
     )
 }
-
-

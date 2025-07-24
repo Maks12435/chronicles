@@ -1,10 +1,10 @@
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
-from datetime import datetime
+from datetime import date, datetime
 from babel.dates import format_date
 
-today = datetime.today()
-formatted = today.strftime('%Y-%m-%d')
+today = date.today()
+formatted = date(today.year, today.month, today.day)
 
 CLIENT_ID = "f346c618c8624f6791f35db57be1951a"
 CLIENT_SECRET = "e6feda1ca95449b4a22f246e571206ac"
