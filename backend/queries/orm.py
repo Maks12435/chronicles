@@ -1,7 +1,7 @@
 from fastapi import HTTPException
-from sqlalchemy import select, func, case, cast, String, distinct, Numeric, desc, asc
+from sqlalchemy import exists, select, func, case, cast, String, distinct, Numeric, desc, asc, update
 from db import session_factory
-from models import MovieTable, Tracks, TracksTable, FootballTable, TeamsTable
+from models import MovieTable, SeriesTable, Tracks, TracksTable, GoalsTable, MatchesTable, TeamsTable, StadiumsTable, TournamentsTable
 from sqlalchemy.orm import aliased
 
 
@@ -59,7 +59,11 @@ def get_next_rank(year: int):
                 return i
         raise ValueError("The Top is already overfilled")
 
-    
+
+def track_exists(session, track_name: str) -> bool:
+    stmt = select(exists().where(TracksTable.title == track_name))
+    return session.scalar(stmt)
+
 def insert_track(track, year):
     with session_factory() as session:
         track_data = track.dict()
@@ -68,6 +72,9 @@ def insert_track(track, year):
         except ValueError as e:
             raise HTTPException(status_code=400, detail=str(e)) 
 
+        if track_exists(session, track_data['title']):
+            raise ValueError("A track with this name already exists")
+        
         session.add(TracksTable(**track_data))
         session.commit()
 
@@ -124,7 +131,7 @@ def swap_with_previous_rank(track_id):
         )
 
         if not previous_track:
-            raise ValueError("No track with higher rank to swap with")
+            raise ValueError("No track with lower rank to swap with")
 
         current.rank = -1
         session.commit() 
@@ -139,54 +146,133 @@ def swap_with_previous_rank(track_id):
 
 
 
-def select_matches():
+def select_matces():
     with session_factory() as session:
         Team1 = aliased(TeamsTable)
         Team2 = aliased(TeamsTable)
+        Stadium = aliased(StadiumsTable)
+        Tournament = aliased(TournamentsTable)
 
         query = (
-            select(FootballTable, Team1, Team2)
-            .join(Team1, FootballTable.team1 == Team1.id)
-            .join(Team2, FootballTable.team2 == Team2.id)
+            select(MatchesTable, Team1, Team2, Stadium, Tournament)
+            .join(Team1, MatchesTable.team1_id == Team1.id)
+            .join(Team2, MatchesTable.team2_id == Team2.id)
+            .join(Stadium, MatchesTable.stadium_id == Stadium.id)
+            .join(Tournament, MatchesTable.tournament_id == Tournament.id)
         )
 
-        result = session.execute(query).all()
+        matches = session.execute(query).all()
 
-        return [
-            {
+        data = []
+        for match, team1, team2, stadium, tournament in matches:
+            goals_query = (
+                select(GoalsTable)
+                .where(GoalsTable.match_id == match.id)
+                .order_by(GoalsTable.minute)
+            )
+            goals = session.execute(goals_query).scalars().all()
+
+            goals_by_team = {
+                team1.id: [],
+                team2.id: []
+            }
+            for goal in goals:
+                goals_by_team[goal.team_id].append({
+                    "minute": goal.minute,
+                    "scorer": goal.scorer,
+                })
+
+            data.append({
                 "id": match.id,
                 "score": match.score,
-                "date": match.date,
-                "stadium": match.stadium,
-                "tournament": match.tournament,
+                "date": match.match_date,
+                "stadium": stadium.name,
+                "tournament": tournament.name,
                 "image": match.image,
                 "stage": match.stage,
                 "team1": {
                     "name": team1.name,
-                    "logo": team1.logo
+                    "logo": team1.logo,
+                    "xg": match.team1_xg,
+                    "shots": match.team1_shots,
+                    "shots_on_target": match.team1_shots_on_target,
+                    "possession": match.team1_possession,
+                    "goals": goals_by_team.get(team1.id, [])
                 },
                 "team2": {
                     "name": team2.name,
-                    "logo": team2.logo
+                    "logo": team2.logo,
+                    "xg": match.team2_xg,
+                    "shots": match.team2_shots,
+                    "shots_on_target": match.team2_shots_on_target,
+                    "possession": match.team2_possession,
+                    "goals": goals_by_team.get(team2.id, [])
                 }
-            }
-            for match, team1, team2 in result
-        ]
+            })
 
 
-def select_movies():
+        return data
+
+
+
+
+
+def select_movies(year):
     with session_factory() as session:
-        query = select(MovieTable)
+        query = select(MovieTable).where(MovieTable.year == year).order_by((MovieTable.personal_rating).desc())
         result = session.execute(query)
         movies = result.scalars().all()
 
         return [movie for movie in movies]
 
+def select_series(year):
+    with session_factory() as session:
+        query = select(SeriesTable).where(SeriesTable.year == year).order_by((SeriesTable.personal_rating).desc())
+        result = session.execute(query)
+        series = result.scalars().all()
+
+        return [item for item in series]
+
+
+def movie_exists(session, movie_title: str) -> bool:
+    stmt = select(exists().where(MovieTable.title == movie_title))
+    return session.scalar(stmt)
+
+def series_exists(session, series_title: str, series_season: int) -> bool:
+    stmt = select(
+        exists().where(
+            (SeriesTable.title == series_title) & (SeriesTable.season_number == series_season)
+        )
+    )
+    return session.scalar(stmt)
+    
 def insert_movie(movie):
     with session_factory() as session:
-        track_data = movie.dict()
+        movie_data = movie.dict()
+        if movie_exists(session, movie_data["title"]):
+            raise ValueError("A film with this name already exists")
+        
+        session.add(MovieTable(**movie_data))
+        session.commit()
 
-        session.add(MovieTable(**track_data))
+def insert_series(series):
+    with session_factory() as session:
+        series_data = series.dict()
+        if series_exists(session, series_data["title"], series_data["season_number"]):
+            raise ValueError("A series with this name already exists.")
+        
+        session.add(SeriesTable(**series_data))
+        session.commit()
+
+def update_rating(rating, id, type):
+    with session_factory() as session:
+        table = MovieTable if type == "movies" else SeriesTable
+        stmt = (
+            update(table)
+            .where(table.id == id)
+            .values(personal_rating=rating)
+        )
+        session.execute(stmt)
         session.commit()
 
 def delete_movie(movie_id):
@@ -199,4 +285,13 @@ def delete_movie(movie_id):
         else:
             return {"error": "movie not found"}
         
+def delete_series(series_id):
+    with session_factory() as session:
+        series = session.get(SeriesTable, series_id)
+        if series:
+            session.delete(series)
+            session.commit()
+            return {"message": "series deleted"}
+        else:
+            return {"error": "series not found"}
         

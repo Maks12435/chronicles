@@ -1,1 +1,5 @@
-export const BASE_URL = 'http://127.0.0.1:8000'
+export const BASE_URL = 'http://localhost:8080'
+export const MUSIC_ROUTE_URL = 'http://localhost:8080/music'
+export const SHOWS_ROUTE_URL = 'http://localhost:8080/shows'
+export const FOOTBALL_ROUTE_URL = 'http://localhost:8080/football'
+export const AUTH_ROUTE_URL = 'http://localhost:8080/auth'

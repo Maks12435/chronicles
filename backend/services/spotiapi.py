@@ -13,11 +13,14 @@ auth_manager = SpotifyClientCredentials(client_id=CLIENT_ID, client_secret=CLIEN
 sp = spotipy.Spotify(auth_manager=auth_manager)
 
 def find_music(track: str):
+    if not track:
+        return None
+    
     query = sp.search(q=track, type="track", limit=1)
     items = query.get('tracks', {}).get('items', [])
 
     if not items:
-        return {'error': 'Track not found'}
+        return None
 
     result = items[0]
 
@@ -46,6 +49,31 @@ def find_music(track: str):
         'date': formatted,
         'duration': duration,
         'image': image_url,
+    }
+
+
+def find_artist(artist_name: str):
+    query = sp.search(q=artist_name, type="artist", limit=1)
+    items = query.get('artists', {}).get('items', [])
+
+    if not items:
+        return {'error': 'Artist not found'}
+
+    artist = items[0]
+
+    name = artist.get('name', 'Unknown Artist')
+    genres = artist.get('genres', [])
+    genre = genres[0] if genres else 'Unknown Genre'
+    image_url = artist.get('images', [{}])[0].get('url', '')
+    followers = artist.get('followers', {}).get('total', 0)
+    popularity = artist.get('popularity', 0)
+
+    return {
+        'name': name,
+        'genre': genre,
+        'image': image_url,
+        'followers': followers,
+        'popularity': popularity,
     }
 
 

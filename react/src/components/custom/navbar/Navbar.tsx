@@ -5,9 +5,9 @@ import {
     NavigationMenuTrigger,
     NavigationMenuLink,
     NavigationMenuList,
-} from '../ui/navigation-menu'
+} from '../../ui/navigation-menu'
 import { Link } from '@tanstack/react-router'
-import { navigationMenuTriggerStyle } from '../ui/navigation-menu'
+import { navigationMenuTriggerStyle } from '../../ui/navigation-menu'
 
 export default function Navbar() {
     return (
@@ -16,7 +16,7 @@ export default function Navbar() {
                 <NavigationMenuList>
                     <NavigationMenuItem>
                         <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                            <Link to="home">Home</Link>
+                            <Link to="/profile">Home</Link>
                         </NavigationMenuLink>
                     </NavigationMenuItem>
                     <NavigationMenuItem>
@@ -24,11 +24,11 @@ export default function Navbar() {
                     </NavigationMenuItem>
                     <NavigationMenuItem>
                         <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                            <Link to="statistics">Statistics</Link>
+                            <Link to="/tasks">Tasks</Link>
                         </NavigationMenuLink>
                     </NavigationMenuItem>
                     <NavigationMenuItem>
-                        <NavigationMenuLink className={navigationMenuTriggerStyle()}>About us</NavigationMenuLink>
+                        <NavigationMenuLink className={navigationMenuTriggerStyle()}><Link to="chronics">Chronics</Link></NavigationMenuLink>
                     </NavigationMenuItem>
                 </NavigationMenuList>
             </NavigationMenu>
