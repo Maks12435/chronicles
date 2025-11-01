@@ -123,11 +123,11 @@ function YearStatistics() {
             <CardContent>
                 <div className="flex gap-x-2 items-center">
                     <Music className="aspect-square w-4 text-zinc-100"></Music>
-                    <h4 className="text-zinc-400">favorite song: Hands up</h4>
+                    <h4 className="text-zinc-400">favorite song: Godzilla</h4>
                 </div>
                 <div className="flex gap-x-2 items-center">
                     <Music2 className="aspect-square w-4 text-zinc-100"></Music2>
-                    <h4 className="text-zinc-400">favorite artist: Le Sserafim</h4>
+                    <h4 className="text-zinc-400">favorite artist: Eminem</h4>
                 </div>
                 <div className="flex gap-x-2 items-center">
                     <Film className="aspect-square w-4 text-zinc-100"></Film>
@@ -159,7 +159,7 @@ function YearStatistics() {
                 </div>
                 <div className="flex gap-x-2 items-center">
                     <Medal className="aspect-square w-4" />
-                    <h4 className="text-zinc-400">achievement of the year: Korean language</h4>
+                    <h4 className="text-zinc-400">achievement of the year: Diploma</h4>
                 </div>
                 <div className="flex gap-x-2 items-center">
                     <CalendarDays className="aspect-square w-4" />

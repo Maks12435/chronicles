@@ -68,9 +68,9 @@ export default function MusicStatistics() {
                         <img
                             src={
                                 selectedYear === '2025'
-                                    ? '/assets/images/chaewon2.webp'
+                                    ? '/assets/images/Eminem.png'
                                     : selectedYear === '2024'
-                                    ? '/assets/images/chaeyoung.webp'
+                                    ? '/assets/images/Eminem.png'
                                     : 'none'
                             }
                             alt="stars"

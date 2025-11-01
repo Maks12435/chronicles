@@ -31,7 +31,7 @@ export default function Navbar() {
                     </NavigationMenuItem>
                     <NavigationMenuItem>
                         <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                            <Link to="chronics">Chronics</Link>
+                            <Link to="chronics">Interests</Link>
                         </NavigationMenuLink>
                     </NavigationMenuItem>
                 </NavigationMenuList>

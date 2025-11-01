@@ -7,8 +7,8 @@ export const musicTotal: Record<
         clip: string
     }
 > = {
-    '2024': { artist: 'Twice', song: 'Talk that Talk - Twice', new_artist: 'Twice', clip: 'Talk that Talk - Twice' },
-    '2025': { artist: 'Le Sserafim', song: 'HOT - Le Sserafim', new_artist: 'Meovv', clip: 'Hands up - Meovv' },
+    '2024': { artist: 'Eminem', song: 'Godzilla - Eminem', new_artist: 'Eminem', clip: 'Godzilla - Eminem' },
+    '2025': { artist: 'Eminem', song: 'Godzilla - Eminem', new_artist: 'The Weekend', clip: 'Godzilla - Eminem' },
 }
 
 export const FootballTotal: Record<
@@ -20,6 +20,6 @@ export const FootballTotal: Record<
         match: string
     }
 > = {
-    '2024': { team: 'Real Madrid', player: 'Vinicius.Jr', coach: 'Carlo Anchelotti', match: 'Talk that Talk - Twice' },
+    '2024': { team: 'Real Madrid', player: 'Vinicius.Jr', coach: 'Carlo Anchelotti', match: 'Barcelona 1:2 Real Madrid \n (Copa del Rey final)' },
     '2025': { team: 'Barcelona', player: 'Raphinia', coach: 'Hansi Flick', match: 'Barcelona 3:2 Real Madrid \n (Copa del Rey final)' },
 }

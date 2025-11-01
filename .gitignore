@@ -2,3 +2,4 @@ backend/.env
 backend/venv/
 react/node_modules
 react/dist
+backend/.cache
