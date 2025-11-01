@@ -12,7 +12,7 @@ import {
     SelectTrigger,
 } from '../../components/ui/select'
 import { fetchMovies, fetchSeries } from '@/api/shows'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import GenresChart from '../../components/custom/charts/genres_chart'
 import AddMovie from './movie_add'
@@ -23,6 +23,7 @@ import AddSeries from './series_add'
 import { getGenresCount } from '../../components/custom/charts/genres_chart'
 import { getAverageRatings } from '../../components/custom/charts/average_rating'
 import { Button } from '@/components/ui/button'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 export default function ShowContainer() {
     const [editMode, setEditMode] = useState(false)
@@ -126,25 +127,27 @@ export default function ShowContainer() {
                         <h3 className="text-lg leading-tight" style={{ fontFamily: 'Staatliches' }}>
                             List of the best movies of this year
                         </h3>
-                        <div className="px-1 flex items-center gap-x-2">
+                        <div className="px-1 flex items-center gap-x-2 pb-2">
                             {type === 'movies' ? (
                                 <AddMovie refetchMovies={refetchMovies} />
                             ) : (
                                 <AddSeries refetchSeries={refetchSeries} />
                             )}
 
-                            <Select onValueChange={(value) => setType(value)}>
-                                <SelectTrigger className="border-none rounded-sm py-1 px-4">
-                                    <SelectValue placeholder="Content type" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectGroup>
-                                        <SelectLabel>Content types</SelectLabel>
-                                        <SelectItem value="movies">movies</SelectItem>
-                                        <SelectItem value="series">series</SelectItem>
-                                    </SelectGroup>
-                                </SelectContent>
-                            </Select>
+                            <Tabs value={type} onValueChange={setType}>
+                                <TabsList>
+                                    <TabsTrigger
+                                        value="movies"
+                                    >
+                                        Movies
+                                    </TabsTrigger>
+                                    <TabsTrigger
+                                        value="series"
+                                    >
+                                        Series
+                                    </TabsTrigger>
+                                </TabsList>
+                            </Tabs>
 
                             <button onClick={() => setEditMode(!editMode)}>
                                 <Edit className="w-5" strokeWidth={1} />

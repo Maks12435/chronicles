@@ -5,16 +5,12 @@ import UserProfileMenu from './components/custom/navbar/UserProfileMenu'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Archive, CheckCircle2Icon, Gem, Heading1Icon, LogsIcon, XCircleIcon } from 'lucide-react'
 import { Toaster } from 'react-hot-toast'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 
 const queryClient = new QueryClient()
 
 function App() {
     const navigate = useNavigate()
-
-    /*useEffect(() => {
-        navigate({ to: '/statistics/media' })
-    }, [])*/
 
     return (
         <QueryClientProvider client={queryClient}>

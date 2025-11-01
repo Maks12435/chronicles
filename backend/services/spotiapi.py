@@ -33,7 +33,9 @@ def find_music(track: str):
     album = result.get('album', {})
     album_name = album.get('name', 'Unknown Album')
     album_artists = album.get('artists', [{}])
-    image_url = album.get('images', [{}])[0].get('url', '')
+    small_image_url = album.get('images', [{}])[2].get('url', '')
+    mid_image_url = album.get('images', [{}])[1].get('url', '')
+    big_image_url = album.get('images', [{}])[0].get('url', '')
 
     genres = artist.get('genres', [])
     genre = genres[0] if genres else 'Unknown Genre'
@@ -42,14 +44,18 @@ def find_music(track: str):
     duration = f"{duration_ms // 60000}:{(duration_ms // 1000) % 60:02d}"
 
     return {
+        'id': result.get('id'),
         'title': result.get('name', 'Unknown Title'),
         'artist': artist_name,
         'album': album_name,
         'genre': genre,
         'date': formatted,
         'duration': duration,
-        'image': image_url,
+        'small_image': small_image_url,
+        'mid_image': mid_image_url,
+		'big_image': big_image_url,
     }
+    
 
 
 def find_artist(artist_name: str):
@@ -64,14 +70,18 @@ def find_artist(artist_name: str):
     name = artist.get('name', 'Unknown Artist')
     genres = artist.get('genres', [])
     genre = genres[0] if genres else 'Unknown Genre'
-    image_url = artist.get('images', [{}])[0].get('url', '')
+    small_image_url = artist.get('images', [{}])[2].get('url', '')
+    mid_image_url = artist.get('images', [{}])[1].get('url', '')
+    big_image_url = artist.get('images', [{}])[0].get('url', '')
     followers = artist.get('followers', {}).get('total', 0)
     popularity = artist.get('popularity', 0)
 
     return {
         'name': name,
         'genre': genre,
-        'image': image_url,
+        'small_image': small_image_url,
+        'mid_image': mid_image_url,
+		'big_image': big_image_url,
         'followers': followers,
         'popularity': popularity,
     }

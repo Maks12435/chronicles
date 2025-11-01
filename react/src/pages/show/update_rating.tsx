@@ -15,10 +15,10 @@ export default function UpdateRating({ placeholder, movie_id, refreshData, type 
             step={0.05}
             value={updatedRating ?? ''}
             onChange={(e) => setUpdatedRating(e.target.value ? Number(e.target.value) : undefined)}
-            onKeyDown={(e) => {
+            onKeyDown={async (e) => {
                 if (e.key === 'Enter' && updatedRating !== undefined) {
                     if (updatedRating >= 0 && updatedRating <= 10) {
-                        updateRating(updatedRating, movie_id, type)
+                        await updateRating(updatedRating, movie_id, type)
                         refreshData()
                         toast.success('Raiting successfully updated')
                     } else {

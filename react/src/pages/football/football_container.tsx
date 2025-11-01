@@ -1,9 +1,9 @@
 import { Separator } from '@/components/ui/separator'
-import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { ChevronDown, ChevronUp, Edit, Loader2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { fetchMatches } from '@/api/football'
-import type { FootballMatchType } from '@/static/types'
+import { fetchMatches, fetchTable } from '@/api/football'
+import type { LeagueTableType, FootballMatchType } from '@/static/types'
 import {
     Select,
     SelectValue,
@@ -17,19 +17,34 @@ import { useQuery } from '@tanstack/react-query'
 import { FootballTotal } from '@/static/localdb'
 import MatchesCarousel from './matches_carousel'
 import { Button } from '@/components/ui/button'
+import LeagueTable from './league_table'
 
 export default function FootballStatistics() {
     const [editMode, setEditMode] = useState(false)
     const [selectedYear, setSelectedYear] = useState('2025')
+    const [league, setLeague] = useState('la-liga')
 
     const {
         data: matches = [],
         isLoading,
         isError,
-        refetch: refetchData,
+        refetch: refetchMatches,
     } = useQuery<FootballMatchType[]>({
         queryKey: ['football'],
         queryFn: () => fetchMatches(),
+        refetchOnWindowFocus: false,
+        placeholderData: (prev) => prev,
+    })
+
+    const {
+        data: table = [],
+        isLoading: tableLoading,
+        isError: tableError,
+        refetch: refetchTableData,
+    } = useQuery<LeagueTableType[]>({
+        queryKey: ['league_table', league],
+        queryFn: () => fetchTable(league),
+        staleTime: 60 * 60 * 1000,
         refetchOnWindowFocus: false,
         placeholderData: (prev) => prev,
     })
@@ -127,7 +142,7 @@ export default function FootballStatistics() {
                         <h3 className="text-lg leading-tight" style={{ fontFamily: 'Staatliches' }}>
                             Top 10 best matches of this year
                         </h3>
-                        <div className="px-5 flex items-center gap-x-2">
+                        <div className="flex items-center gap-x-2">
                             <button onClick={() => setEditMode(!editMode)}>
                                 <Edit className="w-5" strokeWidth={1} />
                             </button>
@@ -144,17 +159,14 @@ export default function FootballStatistics() {
                     {isError && (
                         <div className="flex flex-col justify-center items-center h-[200px] gap-y-2">
                             <p className="text-red-700 text-lg font-semibold">Error durning loading data</p>
-                            <Button
-                                onClick={() => refetchData()}
-                                variant={'custom'}
-								className='max-w-48'
-                            >
+                            <Button onClick={() => refetchMatches()} variant={'custom'} className="max-w-48">
                                 Retry
                             </Button>
                         </div>
                     )}
 
                     {!isLoading && !isError && <MatchesCarousel matches={matches} />}
+					<LeagueTable table={table} setLeague={setLeague} />
                 </div>
             </div>
         </div>

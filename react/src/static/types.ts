@@ -4,9 +4,13 @@ export type TrackType = {
     artist: string
     album: string
     genre: string
-    date: string
+    addition_date: string
     duration: string
-    image: string
+    small_image: string
+    mid_image: string
+    big_image:string
+	rank: number
+    year: number
 }
 
 export type ArtistType = {
@@ -47,11 +51,6 @@ export type FootballMatchType = {
     stage: string
 }
 
-export type ArtistCountType = {
-    artist: string
-    count: number
-}
-
 export type GenresCountType = {
     genre: string
     count: number
@@ -61,14 +60,14 @@ export type MovieType = {
     id: number
     title: string
     original_title: string
-    tagline: string
+    tagline?: string | null
     genre: string
-    description: string
-    release_date: number
-    country: string
-    rating: number
-    personal_rating: number
-    image: string
+    description?: string | null
+    release_date?: string | null 
+    country?: string | null
+	personal_rating?: number | null
+    rating?: number | null
+    image?: string | null
 }
 
 export type SeriesType = {
@@ -78,7 +77,7 @@ export type SeriesType = {
     tagline: string | null
     genre: string
     description: string
-    release_date: string  
+    release_date: string
     country: string
     rating: number
     personal_rating: number
@@ -88,7 +87,6 @@ export type SeriesType = {
     season_overview: string
     season_poster: string
 }
-
 
 export type YearData = {
     artist: ArtistType | null
@@ -105,3 +103,51 @@ export type UserType = {
     username: string
     password: string
 }
+
+export type TaskType = {
+    id?: number
+    title: string
+    description?: string
+    type: string
+    difficulty?: number
+    status?: string
+    created_time?: string
+    finished_time?: string
+}
+
+export type BookType = {
+    id: number
+    title: string
+    author: string
+    isbn: string
+    released_year: string
+    image: string
+    personal_rating?: number | null
+    average_rating?: number | null
+    description?: string
+    language?: string
+    country?: string
+    price?: string
+    web_reader_link?: string
+}
+
+export type LeagueTableType = {
+    number: number,
+    team: string,
+    tour: number,
+    won: number,
+    draw: number,
+    lose: number,
+    scored: number,
+    conceded: number,
+    points: number,
+}
+
+export type DiaryType = {
+	id?: number
+    title: string
+    description: string
+    created_time?: string | null
+    record_type: string
+}
+

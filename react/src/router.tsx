@@ -1,6 +1,6 @@
 import { createRootRoute, createRoute, createRouter, Outlet, redirect } from '@tanstack/react-router'
 import App from './App'
-import TaskStatistics from './pages/tasks'
+import TaskStatistics from './pages/tasks/tasks_container'
 import { RegisterPage } from './pages/register'
 import { LoginPage } from './pages/login'
 import Navbar from './components/custom/navbar/Navbar'
@@ -15,6 +15,8 @@ import FootballStatistics from './pages/football/football_container'
 import ShowContainer from './pages/show/show_container'
 import Chronics from './pages/chronics'
 import Footer from './components/custom/footer/footer'
+import BooksStatistics from './pages/books/books_container'
+import Diary from './pages/diary/diary'
 
 const rootRoute = createRootRoute({
     component: App,
@@ -47,20 +49,42 @@ const privateRoute = createRoute({
             </main>
 
             {/* Footer */}
-            <footer className="bg-zinc-950 border border-t-zinc-800 text-zinc-300 mt-8">
+            <footer className="bg-zinc-950 border border-t-zinc-800 text-zinc-300">
                 <Footer />
             </footer>
         </div>
     ),
     beforeLoad: async () => {
         const state = useUser.getState()
-        if (!state.user) {
-            try {
-                const response = await axios.get(`${AUTH_ROUTE_URL}/check`, {
-                    withCredentials: true,
-                })
-                state.setUser(response.data)
-            } catch {
+        
+        if (state.user) {
+            return
+        }
+
+        try {
+            const response = await axios.get(`${AUTH_ROUTE_URL}/check`, {
+                withCredentials: true,
+            })
+            state.setUser(response.data)
+        } catch (error: any) {
+            if (error.response?.status === 401) {
+                try {
+                    await axios.post(
+                        `${AUTH_ROUTE_URL}/refresh`,
+                        {},
+                        {
+                            withCredentials: true,
+                        }
+                    )
+
+                    const response = await axios.get(`${AUTH_ROUTE_URL}/check`, {
+                        withCredentials: true,
+                    })
+                    state.setUser(response.data)
+                } catch {
+                    throw redirect({ to: '/auth/login' })
+                }
+            } else {
                 throw redirect({ to: '/auth/login' })
             }
         }
@@ -115,6 +139,18 @@ const footballStatisticsRoute = createRoute({
     component: FootballStatistics,
 })
 
+const booksStatisticsRoute = createRoute({
+    path: '/books',
+    getParentRoute: () => privateRoute,
+    component: BooksStatistics,
+})
+
+const DiaryRoute = createRoute({
+    path: '/diary',
+    getParentRoute: () => privateRoute,
+    component: Diary,
+})
+
 const routeTree = rootRoute.addChildren([
     publicRoute.addChildren([LoginRoute, RegisterRoute]),
     privateRoute.addChildren([
@@ -123,7 +159,9 @@ const routeTree = rootRoute.addChildren([
         showStatisticsRoute,
         footballStatisticsRoute,
         chronicsStatisticsRoute,
-		tasksStatisticsRoute,
+        tasksStatisticsRoute,
+        booksStatisticsRoute,
+        DiaryRoute,
     ]),
 ])
 

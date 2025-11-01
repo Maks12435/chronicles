@@ -12,7 +12,7 @@ import { Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import UpdateRating from './update_rating'
 import type { MovieType } from '@/static/types'
-import { handleSeriesDelete } from '@/api/shows'
+import { handleMovieDelete, handleSeriesDelete } from '@/api/shows'
 
 export default function MovieTable( {refreshData, editMode, data, type} : {refreshData: () => void, editMode: boolean, data: MovieType[], type: string} ) {
     const ITEMS_PER_PAGE = 10
@@ -49,8 +49,8 @@ export default function MovieTable( {refreshData, editMode, data, type} : {refre
                             <TableCell className="">
                                 <div className="flex gap-x-2 items-center">
                                     <img
-                                        src={`https://image.tmdb.org/t/p/w500${movie.image}`}
-                                        alt="audio"
+                                        src={`https://image.tmdb.org/t/p/w200${movie.image ?? "/1E5baAaEse26fej7uHcjOgEE2t2.jpg"}`}
+                                        alt="movie"
                                         className="w-12 rounded-sm"
                                     />
                                     <div className="flex flex-col">
@@ -63,7 +63,7 @@ export default function MovieTable( {refreshData, editMode, data, type} : {refre
                                 </div>
                             </TableCell>
                             <TableCell>
-                                {movie.release_date}, ({movie.country})
+                                {movie.release_date ?? '???'}, ({movie.country})
                             </TableCell>
                             <TableCell>
                                 <div className="flex flex-col gap-y-2 items-end">
@@ -91,7 +91,7 @@ export default function MovieTable( {refreshData, editMode, data, type} : {refre
                                     <TableCell>
                                         <Trash2
                                             className="text-red-500 hover:text-red-700 cursor-pointer w-4"
-                                            onClick={async () => {await handleSeriesDelete(movie.id), refreshData()}}
+                                            onClick={async () => {await handleMovieDelete(movie.id), refreshData()}}
                                         />
                                     </TableCell>
                                 </>

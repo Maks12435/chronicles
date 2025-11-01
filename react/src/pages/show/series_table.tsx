@@ -50,7 +50,7 @@ export default function SeriesTable( {refreshData, editMode, data, type} : {refr
                             <TableCell className="">
                                 <div className="flex gap-x-2 items-center">
                                     <img
-                                        src={`https://image.tmdb.org/t/p/w500${movie.season_poster}`}
+                                        src={`https://image.tmdb.org/t/p/w200${movie.season_poster}`}
                                         alt="audio"
                                         className="w-12 rounded-sm"
                                     />
@@ -58,7 +58,6 @@ export default function SeriesTable( {refreshData, editMode, data, type} : {refr
                                         <h4 className="font-medium text-lg text-ellipsis whitespace-nowrap overflow-hidden max-w-[480px]">
                                             {movie.title} ({movie.original_title})
                                         </h4>
-                                        <h4 className="font-medium text-zinc-300">{movie.tagline}</h4>
                                         <h4 className="font-light text-zinc-400">Season: {movie.season_number} (episodes_count: {movie.episodes_count})</h4>
                                         <h4 className="font-light text-zinc-400">Жанр: {movie.genre}</h4>           
                                     </div>

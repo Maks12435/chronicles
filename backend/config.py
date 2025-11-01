@@ -6,6 +6,10 @@ class Settings(BaseSettings):
     DB_PASSWORD: str
     DB_HOST: str
     DB_PORT: int
+    google_client_id: str
+    google_client_secret: str
+    session_secret_key: str 
+    redirect_uri: str 
 
     @property
     def DATABASE_URL_asyncpg(self):

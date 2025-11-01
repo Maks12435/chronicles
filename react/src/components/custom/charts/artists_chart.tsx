@@ -1,9 +1,9 @@
-import type { ArtistCountType } from '@/static/types'
+import type { TrackType } from '@/static/types'
 import { BarChart, Bar, Cell, Tooltip, ResponsiveContainer, XAxis, YAxis } from 'recharts'
 
 const COLORS = ['rgb(3, 71, 134)', 'rgb(21, 85, 176)', 'rgb(79, 132, 205)', 'rgb(129, 160, 204)']
 
-export function getArtistsCount<T extends { artist: string }>(items: T[]) {
+function getArtistsCount<T extends { artist: string }>(items: T[]) {
     const artistCounts = items.reduce((acc, item) => {
         if (acc[item.artist]) {
             acc[item.artist] += 1
@@ -18,7 +18,9 @@ export function getArtistsCount<T extends { artist: string }>(items: T[]) {
         .sort((a, b) => b.count - a.count) 
 }
 
-export default function ArtistChart( {artists} : {artists: ArtistCountType[]} ) {
+export default function ArtistChart( {data} : {data: TrackType[]} ) {
+	const artists = getArtistsCount(data)
+
     return (
         <ResponsiveContainer width="100%" height={420}>
             <BarChart data={artists} layout="vertical" margin={{ top: 20, right: 30, left: 10, bottom: 20 }}>

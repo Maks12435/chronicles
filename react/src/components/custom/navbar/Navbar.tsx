@@ -20,7 +20,9 @@ export default function Navbar() {
                         </NavigationMenuLink>
                     </NavigationMenuItem>
                     <NavigationMenuItem>
-                        <NavigationMenuLink className={navigationMenuTriggerStyle()}>Diary</NavigationMenuLink>
+                        <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                            <Link to="/diary">Diary</Link>
+                        </NavigationMenuLink>
                     </NavigationMenuItem>
                     <NavigationMenuItem>
                         <NavigationMenuLink className={navigationMenuTriggerStyle()}>
@@ -28,7 +30,9 @@ export default function Navbar() {
                         </NavigationMenuLink>
                     </NavigationMenuItem>
                     <NavigationMenuItem>
-                        <NavigationMenuLink className={navigationMenuTriggerStyle()}><Link to="chronics">Chronics</Link></NavigationMenuLink>
+                        <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                            <Link to="chronics">Chronics</Link>
+                        </NavigationMenuLink>
                     </NavigationMenuItem>
                 </NavigationMenuList>
             </NavigationMenu>

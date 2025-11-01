@@ -26,6 +26,7 @@ def find_movie(movie_name: str):
         details_response = requests.get(details_url, params=details_params).json()
 
         return {
+            'id': details_response.get('id'),
             'title': details_response.get('title'),
             'original_title': details_response.get('original_title'),
             'tagline': details_response.get('tagline'),
@@ -42,7 +43,6 @@ def find_movie(movie_name: str):
                 else 'N/A'
             ),
             'rating': details_response.get('vote_average'),
-            'personal_rating': None,
             'image': (
                 details_response.get('poster_path')
                 if details_response.get('poster_path')
@@ -91,6 +91,7 @@ def find_tv_show(tv_name: str, season: int = None):
             season_data = season_response.json() if season_response.status_code == 200 else None
 
         return {
+            'id': details_response.get('id'),
             'title': details_response.get('name'),
             'original_title': details_response.get('original_name'),
             'tagline': None,  
@@ -107,7 +108,6 @@ def find_tv_show(tv_name: str, season: int = None):
                 else 'N/A'
             ),
             'rating': details_response.get('vote_average'),
-            'personal_rating': None,
             'image': (
                 details_response.get('poster_path')
                 if details_response.get('poster_path')

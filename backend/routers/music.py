@@ -1,7 +1,10 @@
-from queries import orm
+from uuid import UUID
+from auth.auth import get_current_user_id
+from queries import music
 from models import Tracks
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Request, Response
 from services.spotiapi import find_artist, find_music
+import httpx
 
 router = APIRouter(prefix='/music', tags=["Music"])
 
@@ -20,38 +23,26 @@ def artist_search(artist_name: str):
     return find_artist(artist_name)
 
 @router.get('/get_tracks')
-def get_tracks(year: int):
-    return orm.select_tracks(year)
-
-@router.get('/get_genres')
-def get_genres(year: int):
-    return orm.select_genres(year)
-
-@router.get('/get_artists')
-def get_artists(year: int):
-    return orm.select_artists(year)
+def get_tracks(year: int, request: Request):
+    user_id = get_current_user_id(request)
+    return music.select_tracks(year, user_id)
 
 @router.post('/add_track')
-def add_track(track: Tracks, year: int = Query(...)):
+def add_track(request: Request, track: Tracks, year: int = Query(...)):
+    user_id = get_current_user_id(request)
     try:
-        return orm.insert_track(track, year)
+        return music.insert_track(track, year, user_id)
     except ValueError as e:
         raise HTTPException(status_code=409, detail=str(e))
 
-@router.post("/swap_rank_next")
-def swap_track_rank(track_id: int):
+@router.post("/swap_track_rank")
+def swap_rank(track_id: UUID, direction: str):
     try:
-        return orm.swap_with_next_rank(track_id)
+        return music.swap_track_rank(track_id, direction)
     except ValueError as e:
         raise HTTPException(status_code=409, detail=str(e))
 
-@router.post("/swap_rank_previous")
-def swap_track_rank(track_id: int):
-    try:
-        return orm.swap_with_previous_rank(track_id)
-    except ValueError as e:
-        raise HTTPException(status_code=409, detail=str(e))
 
 @router.post('/delete_track')
-def delete(track_id: int):
-    return orm.delete_track(track_id)
+def delete(track_id: UUID):
+    return music.delete_track(track_id)

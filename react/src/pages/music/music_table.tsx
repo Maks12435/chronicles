@@ -13,7 +13,7 @@ import { useSelectedYearMusic } from '@/store/yearStore'
 import { motion } from 'framer-motion'
 import { ChevronDown, ChevronUp, Clock, Repeat, Trash2 } from 'lucide-react'
 import { useState } from 'react'
-import { handleDelete, handleSwapRankNext, handleSwapRankPrevious } from '@/api/tracks'
+import { handleDelete, handleSwapRank} from '@/api/tracks'
 
 export default function MusicTable({
     refreshData,
@@ -24,6 +24,17 @@ export default function MusicTable({
     editMode: boolean
     tracks: TrackType[]
 }) {
+    const [imageCache, setImageCache] = useState<Record<string, string>>({})
+
+    const getCachedImage = (url: string) => {
+        if (!imageCache[url]) {
+            const img = new Image()
+            img.src = url
+            img.onload = () => setImageCache((prev) => ({ ...prev, [url]: url }))
+        }
+        return imageCache[url] || '' 
+    }
+
     const ITEMS_PER_PAGE = 10
     const [page, setPage] = useState(1)
     const { selectedYear } = useSelectedYearMusic()
@@ -67,7 +78,7 @@ export default function MusicTable({
                             <TableCell>{(page - 1) * ITEMS_PER_PAGE + index + 1}</TableCell>
                             <TableCell>
                                 <div className="flex gap-x-2 items-center">
-                                    <img src={song.image} alt="audio" className="w-12 rounded-sm" />
+                                    <img src={getCachedImage(song.small_image)} alt="audio" className="w-12 rounded-sm" />
                                     <div className="flex flex-col">
                                         <h4 className="w-64 whitespace-nowrap overflow-hidden text-ellipsis font-medium text-lg">
                                             {song.title}
@@ -81,7 +92,7 @@ export default function MusicTable({
                                     {song.album}
                                 </h4>
                             </TableCell>
-                            <TableCell>{song.date}</TableCell>
+                            <TableCell>{song.addition_date}</TableCell>
                             <TableCell className="text-center">{song.duration}</TableCell>
                             {editMode && currentYear <= parseInt(selectedYear) && (
                                 <>
@@ -98,14 +109,14 @@ export default function MusicTable({
                                         <ChevronUp
                                             className="w-5 cursor-pointer"
                                             onClick={async () => {
-                                                await handleSwapRankNext(song.id)
+                                                await handleSwapRank(song.id, 'up')
                                                 refreshData()
                                             }}
                                         />
                                         <ChevronDown
                                             className="w-5 h-5 cursor-pointer"
                                             onClick={async () => {
-                                                await handleSwapRankPrevious(song.id)
+                                                await handleSwapRank(song.id, 'down')
                                                 refreshData()
                                             }}
                                         />

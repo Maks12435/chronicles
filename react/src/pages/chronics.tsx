@@ -1,48 +1,57 @@
 import { Card, CardContent } from '@/components/ui/card'
+import { Separator } from '@/components/ui/separator'
 import { useNavigate } from '@tanstack/react-router'
 
 export default function Chronics() {
     return (
-        <div className='flex flex-col container'>
-            <div className="grid grid-cols-3 gap-x-4 pt-12">
-                <ContentCard
-                    title="Best Music"
-                    description="Every song captures a moment"
-                    image="chaewon.png"
-                    path="/music"
-                />
-                <ContentCard
-                    title="Best Matches"
-                    description="Football is more than a game"
-                    image="eric.png"
-                    path="/football"
-                />
-                <ContentCard
-                    title="Best TV Shows"
-                    description="Stories that grab your attention"
-                    image="walt.jpg"
-                    path="/shows"
-                />
+        <div className="container">
+            <div className="flex flex-col items-center text-center py-2" style={{ fontFamily: 'Staatliches' }}>
+                <h1 className="text-3xl text-zinc-100">My Hall of Top Favorites</h1>
             </div>
-			<div className="grid grid-cols-3 gap-x-4 pt-12">
-                <ContentCard
-                    title="Best Books"
-                    description="Every song captures a moment"
-                    image="fault.jpg"
-                    path="/books"
-                />
-                <ContentCard
-                    title="Best Games"
-                    description="Football is more than a game"
-                    image="game.jpg"
-                    path="/games"
-                />
-                <ContentCard
-                    title="Best Chess Matches"
-                    description="Stories that grab your attention"
-                    image="chess.jpg"
-                    path="/chess"
-                />
+
+            <Separator className="bg-zinc-700 mb-4" />
+
+            <div className="flex flex-col">
+                <div className="grid grid-cols-3 gap-x-4">
+                    <ContentCard
+                        title="Best Music"
+                        description="Every song captures a moment"
+                        image="chaewon.png"
+                        path="/music"
+                    />
+                    <ContentCard
+                        title="Best Matches"
+                        description="Football is more than a game"
+                        image="eric.png"
+                        path="/football"
+                    />
+                    <ContentCard
+                        title="Best TV Shows"
+                        description="Stories that grab your attention"
+                        image="walt.jpg"
+                        path="/shows"
+                    />
+                </div>
+                <div className="grid grid-cols-3 gap-x-4 pt-8">
+                    <ContentCard
+                        title="Best Books"
+                        description="Every song captures a moment"
+                        image="fault.jpg"
+                        path="/books"
+                    />
+                    <ContentCard
+                        title="Best Games"
+                        description="Football is more than a game"
+                        image="game.jpg"
+                        path="/games"
+                    />
+                    <ContentCard
+                        title="Best Chess Matches"
+                        description="Stories that grab your attention"
+                        image="chess.jpg"
+                        path="/chess"
+                    />
+                </div>
             </div>
         </div>
     )

@@ -8,7 +8,7 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { Search } from 'lucide-react'
+import { Loader2, Search } from 'lucide-react'
 import { useState } from 'react'
 import { Label } from '@/components/ui/label'
 import { type TrackType } from '@/static/types'
@@ -20,6 +20,7 @@ export default function AddSongBox({ refetchTracks }: { refetchTracks: () => voi
     const [openDialog, setOpenDialog] = useState(false)
     const { selectedYear } = useSelectedYearMusic()
     const [findingTrack, setFindingTrack] = useState<TrackType | null>(null)
+	const [loading, setLoading] = useState(false)
 
     return (
         <Dialog open={openDialog} onOpenChange={setOpenDialog}>
@@ -48,7 +49,7 @@ export default function AddSongBox({ refetchTracks }: { refetchTracks: () => voi
                         onChange={(e) => setTrackName(e.target.value)}
                         onKeyDown={async (e) => {
                             if (e.key === 'Enter') {
-                                const result = await handleTrackSearch(trackName)
+                                const result = await handleTrackSearch(trackName, setLoading)
                                 setFindingTrack(result)
                             }
                         }}
@@ -57,7 +58,7 @@ export default function AddSongBox({ refetchTracks }: { refetchTracks: () => voi
                         type="button"
                         className="absolute right-2 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-primary"
                         onClick={async () => {
-                            const result = await handleTrackSearch(trackName)
+                            const result = await handleTrackSearch(trackName, setLoading)
                             setFindingTrack(result)
                         }}
                     >
@@ -65,9 +66,16 @@ export default function AddSongBox({ refetchTracks }: { refetchTracks: () => voi
                     </button>
                 </div>
 
-                {findingTrack && (
+				
+                {loading && (
                     <div className="flex flex-col items-center p-4">
-                        <img src={findingTrack.image} alt="track" className="rounded-md w-[140px]" />
+                        <Loader2 className="w-26 h-26 animate-spin text-zinc-700" />
+                    </div>
+                )}
+
+                {findingTrack && !loading &&(
+                    <div className="flex flex-col items-center p-4">
+                        <img src={findingTrack.mid_image} alt="track" className="rounded-md w-[140px]" />
                         <h4 className="font-semibold text-xl">{findingTrack.title}</h4>
                         <h5 className="text-zinc-400">{findingTrack.artist}</h5>
                     </div>
@@ -76,9 +84,10 @@ export default function AddSongBox({ refetchTracks }: { refetchTracks: () => voi
                 <Button
                     type="button"
                     className="bg-zinc-900 text-primary"
-                    onClick={() => {
+                    onClick={async () => {
                         if (findingTrack) {
-                            handleTrackAdd(findingTrack, selectedYear, refetchTracks)
+                            await handleTrackAdd(findingTrack, selectedYear, refetchTracks)
+							setFindingTrack(null)
                         }
                     }}
                     disabled={!findingTrack}

@@ -14,3 +14,4 @@ const createYearStore = (defaultYear: string) =>
 export const useSelectedYearMusic = createYearStore("2025")
 export const useSelectedYearShows = createYearStore("2025")
 export const useSelectedYearMatches = createYearStore("2025")
+export const useSelectedYearBooks = createYearStore("2025")

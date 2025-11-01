@@ -1,0 +1,43 @@
+version: '3.9'
+
+services:
+  db:
+    image: postgres:17
+    container_name: postgres-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1243
+      POSTGRES_DB: chronics
+    ports:
+      - "5433:5432"
+    networks:
+      - app-network
+
+  backend:
+    build: ./backend
+    container_name: fastapi_app
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./backend:/app
+    env_file:
+      - ./backend/.env
+    depends_on:
+      - db
+    networks:
+      - app-network
+
+  frontend:
+    build: ./react
+    container_name: react-app
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+    networks:
+      - app-network
+
+networks: 
+  app-network:
+    driver: bridge
+
