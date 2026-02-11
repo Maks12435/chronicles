@@ -69,6 +69,7 @@ def refresh_access_token(request, response):
             httponly=True,
             secure=False,
             samesite="lax",
+            path="/",
             max_age=ACCESS_TOKEN_EXPIRE_MINUTES * 60
         )
         
@@ -92,7 +93,8 @@ def user_login(user: User, response):
             value=token,
             httponly=True,  
             secure=False,       
-            samesite="lax",  
+            samesite="lax",
+            path="/",
             max_age=ACCESS_TOKEN_EXPIRE_MINUTES * 60         
         )
         
@@ -102,10 +104,11 @@ def user_login(user: User, response):
             httponly=True,
             secure=False,
             samesite="lax",
+            path="/",
             max_age=REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60
         )
         
-        return {"token created"}
+        return {"message": "token created", "user": {"email": db_user.email, "username": db_user.username}}
     
 def select_user(user_id):
     with session_factory() as session:
@@ -188,5 +191,3 @@ def find_or_create_oauth_user(email, oauth_id, username, provider):
         session.refresh(new_user)
 		
         return new_user
-
-    

@@ -25,6 +25,13 @@ export const handleLogin = async (creds: { email: string; password: string }) =>
             withCredentials: true,
         })
         toast.success('user successfully loged in')
+        // После успешного логина проверяем авторизацию
+        const checkResponse = await axios.get(`${AUTH_ROUTE_URL}/check`, {
+            withCredentials: true,
+        })
+        if (checkResponse.data) {
+            useUser.getState().setUser(checkResponse.data)
+        }
     } catch (error: any) {
         if (error.response) {
             toast.error(error.response.data.detail)

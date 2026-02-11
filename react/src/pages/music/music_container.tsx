@@ -12,7 +12,6 @@ import {
     SelectLabel,
     SelectTrigger,
 } from '../../components/ui/select'
-import { musicTotal } from '@/static/localdb'
 import { useQuery } from '@tanstack/react-query'
 import { fetchTracks } from '@/api/tracks'
 import { currentYear } from '@/store/storage'
@@ -27,7 +26,7 @@ import { useMemo } from 'react'
 
 export default function MusicStatistics() {
     const [editMode, setEditMode] = useState(false)
-    const { selectedYear, setSelectedYear } = useSelectedYearMusic()
+    const {selectedYear, setSelectedYear } = useSelectedYearMusic()
 
     const {
         data: tracks = [],
@@ -67,11 +66,11 @@ export default function MusicStatistics() {
                     <div className="relative">
                         <img
                             src={
-                                selectedYear === '2025'
-                                    ? '/assets/images/Eminem.png'
-                                    : selectedYear === '2024'
-                                    ? '/assets/images/Eminem.png'
-                                    : 'none'
+                                selectedYear === 2025
+                                    ? '/assets/images/chaewon2.webp'
+                                    : selectedYear === 2024
+                                    ? '/assets/images/chaeyoung.png'
+                                    : '/assets/images/Eminem.png'
                             }
                             alt="stars"
                             className="w-full"
@@ -93,16 +92,16 @@ export default function MusicStatistics() {
                 </div>
                 <div className="col-span-5 tracking-widest text-primary flex flex-col justify-center gap-y-4">
                     <div className="flex justify-end">
-                        <Select onValueChange={(value) => setSelectedYear(value)}>
+                        <Select onValueChange={(value) => setSelectedYear(Number(value))}>
                             <SelectTrigger className="border-none bg-transparent [&>svg]:hidden">
                                 <SelectValue placeholder="Select the year"></SelectValue>
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectGroup>
                                     <SelectLabel>Years</SelectLabel>
-                                    <SelectItem value="2025">2025</SelectItem>
-                                    <SelectItem value="2024">2024</SelectItem>
-                                    <SelectItem value="2023">2023</SelectItem>
+                                    {Array.from({length: currentYear - 2021}, (_, i) => 2022 + i).map((year) => (
+										<SelectItem value={String(year)}>{year}</SelectItem>
+									))}
                                 </SelectGroup>
                             </SelectContent>
                         </Select>
@@ -114,7 +113,7 @@ export default function MusicStatistics() {
                                     <p>Artist of the Year</p>
                                 </TableCell>
                                 <TableCell>
-                                    {bestArtist} ({bestRate})
+                                    {bestArtist} ({bestRate} point)
                                 </TableCell>
                             </TableRow>
                             <TableRow>
@@ -129,7 +128,7 @@ export default function MusicStatistics() {
                                 <TableCell className="flex gap-x-1">
                                     <p>The best new artist of the year</p>
                                 </TableCell>
-                                <TableCell>{musicTotal[selectedYear].new_artist}</TableCell>
+                                <TableCell>Meovv</TableCell>
                             </TableRow>
                             <TableRow>
                                 <TableCell className="flex gap-x-1">
@@ -153,10 +152,10 @@ export default function MusicStatistics() {
                             <AddSongBox refetchTracks={refetchTracks} />
                             <button
                                 onClick={() => setEditMode(!editMode)}
-                                disabled={currentYear > parseInt(selectedYear)}
+                                disabled={currentYear > selectedYear}
                             >
                                 <Edit
-                                    className={currentYear > parseInt(selectedYear) ? 'w-5 text-zinc-500' : 'w-5'}
+                                    className={currentYear > selectedYear ? 'w-5 text-zinc-500' : 'w-5'}
                                     strokeWidth={2}
                                 />
                             </button>

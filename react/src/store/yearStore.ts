@@ -1,17 +1,18 @@
 import { create } from 'zustand'
+import { currentYear } from './storage'
 
 type YearState = {
-    selectedYear: string
-    setSelectedYear: (year: string) => void
+    selectedYear: number
+    setSelectedYear: (year: number) => void
 }
 
-const createYearStore = (defaultYear: string) =>
+const createYearStore = (defaultYear: number) =>
   create<YearState>((set) => ({
     selectedYear: defaultYear,
     setSelectedYear: (year) => set({ selectedYear: year }),
   }))
 
-export const useSelectedYearMusic = createYearStore("2025")
-export const useSelectedYearShows = createYearStore("2025")
-export const useSelectedYearMatches = createYearStore("2025")
-export const useSelectedYearBooks = createYearStore("2025")
+export const useSelectedYearMusic = createYearStore(currentYear)
+export const useSelectedYearShows = createYearStore(currentYear)
+export const useSelectedYearMatches = createYearStore(currentYear)
+export const useSelectedYearBooks = createYearStore(currentYear)

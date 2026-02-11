@@ -62,12 +62,12 @@ export type MovieType = {
     original_title: string
     tagline?: string | null
     genre: string
-    description?: string | null
-    release_date?: string | null 
-    country?: string | null
-	personal_rating?: number | null
-    rating?: number | null
-    image?: string | null
+    description: string 
+    release_date: string 
+    country: string 
+	personal_rating: number 
+    rating: number 
+    image: string 
 }
 
 export type SeriesType = {

@@ -3,7 +3,7 @@ import axios from 'axios'
 import type { TrackType } from '@/static/types'
 import toast from 'react-hot-toast'
 
-export const fetchTracks = async (year: string): Promise<TrackType[]> => {
+export const fetchTracks = async (year: number): Promise<TrackType[]> => {
     try {
         const response = await axios.get(`${MUSIC_ROUTE_URL}/get_tracks?year=${year}`, {
             headers: { 'Content-Type': 'application/json' },

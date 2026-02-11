@@ -20,7 +20,7 @@ app.add_middleware(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5174"],  
+    allow_origins=["http://localhost:5173"],  
     allow_credentials=True,
     allow_methods=["*"],  
     allow_headers=["*"],  
@@ -37,4 +37,4 @@ app.include_router(books.router)
 app.include_router(diary.router)
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="0.0.0.0", reload=True, port=8080)
+	uvicorn.run("main:app", host="::", reload=True, port=8080)

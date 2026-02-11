@@ -24,10 +24,11 @@ import { getGenresCount } from '../../components/custom/charts/genres_chart'
 import { getAverageRatings } from '../../components/custom/charts/average_rating'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { currentYear } from '@/store/storage'
 
 export default function ShowContainer() {
     const [editMode, setEditMode] = useState(false)
-    const [selectedYear, setSelectedYear] = useState('2025')
+    const [selectedYear, setSelectedYear] = useState(currentYear)
     const [type, setType] = useState('movies')
 
     const {
@@ -62,11 +63,11 @@ export default function ShowContainer() {
                     <div className="relative">
                         <img
                             src={
-                                selectedYear === '2025'
+                                selectedYear === 2025
                                     ? '/assets/images/movies.png'
-                                    : selectedYear === '2024'
+                                    : selectedYear === 2024
                                     ? '/assets/images/movies.webp'
-                                    : 'none'
+                                    : '/assets/images/movies.webp'
                             }
                             alt="stars"
                             className="w-full"
@@ -88,16 +89,16 @@ export default function ShowContainer() {
                 </div>
                 <div className="col-span-5 movieing-widest text-primary flex flex-col justify-center gap-y-4">
                     <div className="flex justify-end">
-                        <Select onValueChange={(value) => setSelectedYear(value)}>
+                        <Select onValueChange={(value) => setSelectedYear(Number(value))}>
                             <SelectTrigger className="border-none bg-transparent [&>svg]:hidden">
                                 <SelectValue placeholder="Select the year"></SelectValue>
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectGroup>
                                     <SelectLabel>Years</SelectLabel>
-                                    <SelectItem value="2025">2025</SelectItem>
-                                    <SelectItem value="2024">2024</SelectItem>
-                                    <SelectItem value="2023">2023</SelectItem>
+									{Array.from({length: currentYear - 2021}, (_, i) => 2022 + i).map((year) => (
+										<SelectItem value={String(year)}>{year}</SelectItem>
+									))}
                                 </SelectGroup>
                             </SelectContent>
                         </Select>

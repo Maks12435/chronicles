@@ -4,7 +4,7 @@ import { SHOWS_ROUTE_URL } from '@/static/urls'
 import toast from 'react-hot-toast'
 import api from './axios'
 
-export const fetchMovies = async (year: string): Promise<MovieType[]> => {
+export const fetchMovies = async (year: number): Promise<MovieType[]> => {
     const response = await axios.get<MovieType[]>(`${SHOWS_ROUTE_URL}/get_movies?year=${year}`, {
         headers: { 'Content-Type': 'application/json' },
         withCredentials: true,
@@ -12,7 +12,7 @@ export const fetchMovies = async (year: string): Promise<MovieType[]> => {
     return response.data
 }
 
-export const fetchSeries = async (year: string): Promise<SeriesType[]> => {
+export const fetchSeries = async (year: number): Promise<SeriesType[]> => {
     const response = await axios.get<SeriesType[]>(`${SHOWS_ROUTE_URL}/get_series?year=${year}`, {
         headers: { 'Content-Type': 'application/json' },
         withCredentials: true,
