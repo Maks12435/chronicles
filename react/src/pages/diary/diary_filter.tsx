@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
-import type { DiaryType } from '@/static/types'
+import type { DiaryType } from '@/store/types'
 import { Filter } from 'lucide-react'
 
 interface DiaryFiltersProps {

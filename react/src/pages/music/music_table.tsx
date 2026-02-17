@@ -6,14 +6,14 @@ import {
     PaginationNext,
     PaginationPrevious,
 } from '../../components/ui/pagination'
-import { Table, TableBody, TableCell, TableHead, TableHeader } from '@/components/ui/table'
-import { currentYear } from '@/store/storage'
-import type { TrackType } from '@/static/types'
-import { useSelectedYearMusic } from '@/store/yearStore'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { currentYear } from '@/store/global-variables'
+import type { TrackType } from '@/store/types'
+import { useSelectedYearMusic } from '@/store/global-variables'
 import { motion } from 'framer-motion'
 import { ChevronDown, ChevronUp, Clock, Repeat, Trash2 } from 'lucide-react'
 import { useState } from 'react'
-import { handleDelete, handleSwapRank} from '@/api/tracks'
+import { handleDelete, handleSwapRank } from '@/api/tracks'
 
 export default function MusicTable({
     refreshData,
@@ -32,7 +32,7 @@ export default function MusicTable({
             img.src = url
             img.onload = () => setImageCache((prev) => ({ ...prev, [url]: url }))
         }
-        return imageCache[url] || '' 
+        return imageCache[url] || ''
     }
 
     const ITEMS_PER_PAGE = 10
@@ -46,25 +46,27 @@ export default function MusicTable({
         <>
             <Table className="overflow-hidden">
                 <TableHeader>
-                    <TableHead>#</TableHead>
-                    <TableHead>Название</TableHead>
-                    <TableHead>Альбом</TableHead>
-                    <TableHead>Дата добавления</TableHead>
-                    <TableHead>
-                        <div className="flex justify-center items-center">
-                            <Clock className="w-4" />
-                        </div>
-                    </TableHead>
-                    {editMode && currentYear <= parseInt(selectedYear) && (
-                        <>
-                            <TableHead>
-                                <Trash2 className="w-4" />
-                            </TableHead>
-                            <TableHead>
-                                <Repeat className="w-4" />
-                            </TableHead>
-                        </>
-                    )}
+                    <TableRow>
+                        <TableHead>#</TableHead>
+                        <TableHead>Название</TableHead>
+                        <TableHead>Альбом</TableHead>
+                        <TableHead>Дата добавления</TableHead>
+                        <TableHead>
+                            <div className="flex justify-center items-center">
+                                <Clock className="w-4" />
+                            </div>
+                        </TableHead>
+                        {editMode && currentYear <= selectedYear && (
+                            <>
+                                <TableHead>
+                                    <Trash2 className="w-4" />
+                                </TableHead>
+                                <TableHead>
+                                    <Repeat className="w-4" />
+                                </TableHead>
+                            </>
+                        )}
+                    </TableRow>
                 </TableHeader>
                 <TableBody>
                     {paginatedData.map((song, index) => (
@@ -78,7 +80,11 @@ export default function MusicTable({
                             <TableCell>{(page - 1) * ITEMS_PER_PAGE + index + 1}</TableCell>
                             <TableCell>
                                 <div className="flex gap-x-2 items-center">
-                                    <img src={getCachedImage(song.small_image)} alt="audio" className="w-12 rounded-sm" />
+                                    <img
+                                        src={getCachedImage(song.small_image || song.mid_image || song.big_image || 'assets/images/chess.jpg')}
+                                        alt="audio"
+                                        className="w-12 rounded-sm"
+                                    />
                                     <div className="flex flex-col">
                                         <h4 className="w-64 whitespace-nowrap overflow-hidden text-ellipsis font-medium text-lg">
                                             {song.title}
@@ -94,7 +100,7 @@ export default function MusicTable({
                             </TableCell>
                             <TableCell>{song.addition_date}</TableCell>
                             <TableCell className="text-center">{song.duration}</TableCell>
-                            {editMode && currentYear <= parseInt(selectedYear) && (
+                            {editMode && currentYear <= selectedYear && (
                                 <>
                                     <TableCell>
                                         <Trash2

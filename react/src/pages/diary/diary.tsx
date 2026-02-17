@@ -1,7 +1,7 @@
 import { fetchDiaryRecords, handleDiaryRecordDelete } from '@/api/diary'
 import RecordAdd from './record_add'
 import { useQuery } from '@tanstack/react-query'
-import type { DiaryType } from '@/static/types'
+import type { DiaryType } from '@/store/types'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { useState, useMemo } from 'react'
 import RecordUpdate from './record_update'

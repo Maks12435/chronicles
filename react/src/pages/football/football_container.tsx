@@ -3,7 +3,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { ChevronDown, ChevronUp, Edit, Loader2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { fetchMatches, fetchTable } from '@/api/football'
-import type { LeagueTableType, FootballMatchType } from '@/static/types'
+import type { LeagueTableType, FootballMatchType } from '@/store/types'
 import {
     Select,
     SelectValue,
@@ -14,14 +14,16 @@ import {
     SelectTrigger,
 } from '../../components/ui/select'
 import { useQuery } from '@tanstack/react-query'
-import { FootballTotal } from '@/static/localdb'
 import MatchesCarousel from './matches_carousel'
 import { Button } from '@/components/ui/button'
 import LeagueTable from './league_table'
+import { useSelectedYearMatches } from '@/store/global-variables'
+import { currentYear } from '@/store/global-variables'
+import { YearSelection } from '@/components/custom/main/interests/header'
 
 export default function FootballStatistics() {
     const [editMode, setEditMode] = useState(false)
-    const [selectedYear, setSelectedYear] = useState('2025')
+    const { selectedYear, setSelectedYear } = useSelectedYearMatches()
     const [league, setLeague] = useState('la-liga')
 
     const {
@@ -53,44 +55,23 @@ export default function FootballStatistics() {
         <div className="container">
             <div className="grid grid-cols-10 gap-x-4 relative pt-6">
                 <div className="col-span-5 tracking-widest text-primary flex flex-col justify-center gap-y-4">
-                    <div className="flex">
-                        <Select onValueChange={(value) => setSelectedYear(value)}>
-                            <SelectTrigger className="border-none bg-transparent [&>svg]:hidden">
-                                <SelectValue placeholder="Select the year"></SelectValue>
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectGroup>
-                                    <SelectLabel>Years</SelectLabel>
-                                    <SelectItem value="2025">2025</SelectItem>
-                                    <SelectItem value="2024">2024</SelectItem>
-                                    <SelectItem value="2023">2023</SelectItem>
-                                </SelectGroup>
-                            </SelectContent>
-                        </Select>
-                    </div>
                     <Table>
                         <TableBody className="text-md">
                             <TableRow>
                                 <TableCell>Team of the season</TableCell>
-                                <TableCell>{FootballTotal[selectedYear].team}</TableCell>
+                                <TableCell>Barcelona</TableCell>
                             </TableRow>
                             <TableRow>
                                 <TableCell>Player of the season</TableCell>
-                                <TableCell>{FootballTotal[selectedYear].player}</TableCell>
+                                <TableCell>Raphinia</TableCell>
                             </TableRow>
                             <TableRow>
                                 <TableCell>Coach of the season</TableCell>
-                                <TableCell>{FootballTotal[selectedYear].coach}</TableCell>
+                                <TableCell>Hansi Flick</TableCell>
                             </TableRow>
                             <TableRow>
                                 <TableCell>Match of the season</TableCell>
-                                <TableCell>
-                                    <p
-                                        dangerouslySetInnerHTML={{
-                                            __html: FootballTotal['2025'].match.replace(/\n/g, '<br />'),
-                                        }}
-                                    />
-                                </TableCell>
+                                <TableCell>Barcelona : Real Madrid (3:2)</TableCell>
                             </TableRow>
                         </TableBody>
                     </Table>
@@ -100,11 +81,13 @@ export default function FootballStatistics() {
                     <div className="relative">
                         <img
                             src={
-                                selectedYear === '2025'
+                                selectedYear === 2026
                                     ? '/assets/images/football.webp'
-                                    : selectedYear === '2024'
-                                    ? '/assets/images/football2.webp'
-                                    : 'none'
+                                    : selectedYear === 2025
+                                      ? '/assets/images/football.webp'
+                                      : selectedYear === 2024
+                                        ? '/assets/images/football2.webp'
+                                        : 'none'
                             }
                             alt="stars"
                             className="w-full"
@@ -143,6 +126,7 @@ export default function FootballStatistics() {
                             Top 10 best matches of this year
                         </h3>
                         <div className="flex items-center gap-x-2">
+                            <YearSelection setSelectedYear={setSelectedYear} />
                             <button onClick={() => setEditMode(!editMode)}>
                                 <Edit className="w-5" strokeWidth={1} />
                             </button>
@@ -166,7 +150,7 @@ export default function FootballStatistics() {
                     )}
 
                     {!isLoading && !isError && <MatchesCarousel matches={matches} />}
-					<LeagueTable table={table} setLeague={setLeague} />
+                    <LeagueTable table={table} setLeague={setLeague} />
                 </div>
             </div>
         </div>

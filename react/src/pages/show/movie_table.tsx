@@ -6,39 +6,53 @@ import {
     PaginationNext,
     PaginationPrevious,
 } from '../../components/ui/pagination'
-import { Table, TableBody, TableCell, TableHead, TableHeader } from '@/components/ui/table'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { motion } from 'framer-motion'
 import { Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import UpdateRating from './update_rating'
-import type { MovieType } from '@/static/types'
+import type { MovieType } from '@/store/types'
 import { handleMovieDelete, handleSeriesDelete } from '@/api/shows'
 
-export default function MovieTable( {refreshData, editMode, data, type} : {refreshData: () => void, editMode: boolean, data: MovieType[], type: string} ) {
+export default function MovieTable({
+    refreshData,
+    editMode,
+    data,
+    type,
+}: {
+    refreshData: () => void
+    editMode: boolean
+    data: MovieType[]
+    type: string
+}) {
     const ITEMS_PER_PAGE = 10
     const totalPages = Math.ceil(data.length / ITEMS_PER_PAGE)
     const [page, setPage] = useState(1)
     const paginatedData = data.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE)
+    const MotionTableRow = motion(TableRow)
 
     return (
         <>
             <Table className="overflow-hidden">
                 <TableHeader>
-                    <TableHead>#</TableHead>
-                    <TableHead>Описание</TableHead>
-                    <TableHead>Дата выхода</TableHead>
-                    <TableHead className="text-end px-3">Рейтинги</TableHead>
-                    {editMode && (
-                        <>
-                            <TableHead>
-                                <Trash2 className="w-4" />
-                            </TableHead>
-                        </>
-                    )}
+                    <TableRow>
+                        <TableHead>#</TableHead>
+                        <TableHead>Описание</TableHead>
+                        <TableHead>Дата выхода</TableHead>
+                        <TableHead>Дата просмотра</TableHead>
+                        <TableHead className="text-end px-3">Рейтинги</TableHead>
+                        {editMode && (
+                            <>
+                                <TableHead>
+                                    <Trash2 className="w-4" />
+                                </TableHead>
+                            </>
+                        )}
+                    </TableRow>
                 </TableHeader>
                 <TableBody>
                     {paginatedData.map((movie, index) => (
-                        <motion.tr
+                        <MotionTableRow
                             key={movie.id}
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
@@ -49,12 +63,12 @@ export default function MovieTable( {refreshData, editMode, data, type} : {refre
                             <TableCell className="">
                                 <div className="flex gap-x-2 items-center">
                                     <img
-                                        src={`https://image.tmdb.org/t/p/w200${movie.image ?? "/1E5baAaEse26fej7uHcjOgEE2t2.jpg"}`}
+                                        src={`https://image.tmdb.org/t/p/w200${movie.image ?? '/1E5baAaEse26fej7uHcjOgEE2t2.jpg'}`}
                                         alt="movie"
                                         className="w-12 rounded-sm"
                                     />
                                     <div className="flex flex-col">
-                                        <h4 className="font-medium text-lg text-ellipsis whitespace-nowrap overflow-hidden max-w-[480px]">
+                                        <h4 className="font-medium text-lg text-ellipsis whitespace-nowrap overflow-hidden max-w-[360px]">
                                             {movie.title} ({movie.original_title})
                                         </h4>
                                         <h4 className="font-medium text-zinc-300">{movie.tagline}</h4>
@@ -63,8 +77,9 @@ export default function MovieTable( {refreshData, editMode, data, type} : {refre
                                 </div>
                             </TableCell>
                             <TableCell>
-                                {movie.release_date ?? '???'}, ({movie.country})
+                                {movie.release_date ?? '???'}
                             </TableCell>
+                            <TableCell>{movie.addition_date ?? '???'}</TableCell>
                             <TableCell>
                                 <div className="flex flex-col gap-y-2 items-end">
                                     <div className="bg-gradient-to-bl from-[#002a85] via-[#004cc6] to-[#002185] px-2 rounded-full w-20 text-center font-semibold">
@@ -91,12 +106,14 @@ export default function MovieTable( {refreshData, editMode, data, type} : {refre
                                     <TableCell>
                                         <Trash2
                                             className="text-red-500 hover:text-red-700 cursor-pointer w-4"
-                                            onClick={async () => {await handleMovieDelete(movie.id), refreshData()}}
+                                            onClick={async () => {
+                                                ;(await handleMovieDelete(movie.id), refreshData())
+                                            }}
                                         />
                                     </TableCell>
                                 </>
                             )}
-                        </motion.tr>
+                        </MotionTableRow>
                     ))}
                 </TableBody>
             </Table>

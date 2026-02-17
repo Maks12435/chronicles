@@ -1,30 +1,20 @@
-import type { GenresCountType, MovieType, SeriesType } from '@/static/types'
-import axios from 'axios'
-import { SHOWS_ROUTE_URL } from '@/static/urls'
+import type { MovieType, SeriesType } from '@/store/types'
 import toast from 'react-hot-toast'
-import api from './axios'
+import apiRequest from './axios'
 
 export const fetchMovies = async (year: number): Promise<MovieType[]> => {
-    const response = await axios.get<MovieType[]>(`${SHOWS_ROUTE_URL}/get_movies?year=${year}`, {
-        headers: { 'Content-Type': 'application/json' },
-        withCredentials: true,
-    })
-    return response.data
+    return apiRequest<MovieType[]>({ url: `shows/get_movies?year=${year}`, method: 'GET' }, { silent: true })
 }
 
 export const fetchSeries = async (year: number): Promise<SeriesType[]> => {
-    const response = await axios.get<SeriesType[]>(`${SHOWS_ROUTE_URL}/get_series?year=${year}`, {
-        headers: { 'Content-Type': 'application/json' },
-        withCredentials: true,
-    })
-    return response.data
+    return apiRequest<SeriesType[]>({ url: `shows/get_series?year=${year}`, method: 'GET' }, { silent: true })
 }
 
 export const updateRating = async (rating: number, movie_id: number, type: string) => {
-    await api.post(`${SHOWS_ROUTE_URL}/update_rating?rating=${rating}&id=${movie_id}&type=${type}`, {
-        headers: { 'Content-Type': 'application/json' },
-        withCredentials: true,
-    })
+    await apiRequest(
+        { url: `shows/update_rating?rating=${rating}&id=${movie_id}&type=${type}`, method: 'POST' },
+        { successMessage: 'Rating updated successfully' }
+    )
 }
 
 export const handleMovieAdd = async (movie: MovieType | null, personal_rating: number, refetchMovies: () => void) => {
@@ -33,109 +23,53 @@ export const handleMovieAdd = async (movie: MovieType | null, personal_rating: n
     } else if (personal_rating > 10 || personal_rating < 0) {
         toast.error('Your rating is out of range')
     } else {
-        try {
-            const response = await api.post(
-                `${SHOWS_ROUTE_URL}/add_movie`,
-                {
-                    data: movie,
-                    personal_rating: personal_rating,
-                },
-                {
-                    headers: { 'Content-Type': 'application/json' },
-                    withCredentials: true,
-                }
-            )
-            refetchMovies()
-            toast.success('Movie has been successfully added.')
-        } catch (error: any) {
-            if (error.response) {
-                toast.error(error.response.data.detail)
-            } else {
-                toast.error(error.message)
-            }
-        }
+        await apiRequest(
+            { url: `shows/add_movie`, method: 'POST', data: { data: movie, personal_rating } },
+            { successMessage: 'Movie has been successfully added.' }
+        )
+        refetchMovies()
     }
 }
 
 export const handleMovieSearch = async (movie_name: string, setLoading: (loading: boolean) => void) => {
-    try {
-        setLoading(true)
-        const response = await axios.get(`${SHOWS_ROUTE_URL}/movie_search?movie_name=${movie_name}`)
-        setLoading(false)
-        return response.data
-    } catch (error: any) {
-        if (error.response) {
-            toast.error(error.response.data.detail)
-        } else {
-            toast.error(error.message)
-        }
-        setLoading(false)
-    }
+    setLoading(true)
+    return apiRequest<MovieType | null>({ url: `shows/movie_search?movie_name=${movie_name}`, method: 'GET' }, { silent: true }).finally(() => setLoading(false))
 }
 
-export const handleSeriesAdd = async (series: SeriesType | null, personal_rating: number, refetchSeries: () => void) => {
+export const handleSeriesAdd = async (
+    series: SeriesType | null,
+    personal_rating: number,
+    refetchSeries: () => void
+) => {
     if (!personal_rating) {
         toast.error('First you need to rate this series')
     } else if (personal_rating > 10 || personal_rating < 0) {
         toast.error('Your rating is out of range')
     } else {
-        try {
-            const response = await api.post(`${SHOWS_ROUTE_URL}/add_series`, {
-                    data: series,
-                    personal_rating: personal_rating,
-                },
-                {
-                    headers: { 'Content-Type': 'application/json' },
-                    withCredentials: true,
-                })
-            refetchSeries()
-            toast.success('The series has been successfully added')
-        } catch (error: any) {
-            if (error.response) {
-                toast.error(error.response.data.detail)
-            } else {
-                toast.error(error.message)
-            }
-        }
+        await apiRequest(
+            { url: `shows/add_series`, method: 'POST', data: { data: series, personal_rating } },
+            { successMessage: 'The series has been successfully added' }
+        )
+        refetchSeries()
     }
 }
 
-export const handleSeriesSearch = async (series_name: string, season: number, setLoading: (loading: boolean) => void) => {
-    try {
-		setLoading(true)
-        const response = await axios.get(`${SHOWS_ROUTE_URL}/series_search?series_name=${series_name}&season=${season}`)
-		setLoading(false)
-        return response.data
-    } catch (error: any) {
-        if (error.response) {
-            toast.error(error.response.data.detail)
-        } else {
-            toast.error(error.message)
-        }
-		setLoading(false)
-    }
+export const handleSeriesSearch = async (
+    series_name: string,
+    season: number,
+    setLoading: (loading: boolean) => void
+) => {
+    setLoading(true)
+    return apiRequest<SeriesType | null>(
+        { url: `shows/series_search?series_name=${series_name}&season=${season}`, method: 'GET' },
+        { silent: true }
+    ).finally(() => setLoading(false))
 }
 
 export const handleSeriesDelete = async (series_id: number) => {
-    try {
-        await api.post(`${SHOWS_ROUTE_URL}/delete_series?series_id=${series_id}`, {
-            headers: { 'Content-Type': 'application/json' },
-            withCredentials: true,
-        })
-        toast.success('Series successfully deleted')
-    } catch (error: any) {
-        console.log(error.message)
-    }
+    await apiRequest({ url: `shows/delete_series?series_id=${series_id}`, method: 'POST' }, { successMessage: 'Series successfully deleted' })
 }
 
 export const handleMovieDelete = async (movie_id: number) => {
-    try {
-        await api.post(`${SHOWS_ROUTE_URL}/delete_movie?movie_id=${movie_id}`, {
-            headers: { 'Content-Type': 'application/json' },
-            withCredentials: true,
-        })
-        toast.success('Movies successfully deleted')
-    } catch (error: any) {
-        console.log(error.message)
-    }
+    await apiRequest({ url: `shows/delete_movie?movie_id=${movie_id}`, method: 'POST' }, { successMessage: 'Movie successfully deleted' })
 }

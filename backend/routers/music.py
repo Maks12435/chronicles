@@ -8,7 +8,7 @@ import httpx
 
 router = APIRouter(prefix='/music', tags=["Music"])
 
-@router.post('/music_search')
+@router.get('/music_search')
 def music_search(track_name: str):
     track = find_music(track_name)
     if not track:
@@ -18,7 +18,7 @@ def music_search(track_name: str):
         )
     return track
 
-@router.post('/artist_search')
+@router.get('/artist_search')
 def artist_search(artist_name: str):
     return find_artist(artist_name)
 

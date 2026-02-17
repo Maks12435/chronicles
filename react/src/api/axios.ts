@@ -1,52 +1,31 @@
-import axios from 'axios'
+import { BASE_URL } from '@/store/global-variables'
+import axios, { AxiosError, type AxiosRequestConfig } from 'axios'
+import toast from 'react-hot-toast'
 
-// 🧹 Рекурсивная очистка объекта от пустых строк и пустых массивов
-const cleanDeep = (obj: any): any => {
-  if (obj === '') return null
-  if (obj === null || obj === undefined) return obj
+const api = axios.create({
+    baseURL: BASE_URL,
+    withCredentials: true,
+    headers: { 'Content-Type': 'application/json' },
+})
 
-  if (Array.isArray(obj)) {
-    return obj
-      .map(cleanDeep)
-      .filter((v) => v !== null && v !== undefined)
-  }
-
-  if (typeof obj === 'object') {
-    for (const key of Object.keys(obj)) {
-      const val = obj[key]
-
-      if (val === '') {
-        obj[key] = null
-      } else if (Array.isArray(val)) {
-        obj[key] = cleanDeep(val)
-        if (obj[key].length === 0) obj[key] = null
-      } else if (typeof val === 'object' && val !== null) {
-        obj[key] = cleanDeep(val)
-      }
-    }
-  }
-
-  return obj
+function gerErrorMessage(err: unknown): string {
+    const e = err as AxiosError<any>
+    return (e.response?.data as any)?.detail || e.message || 'Request failed'
 }
 
-// 🧠 Создаём экземпляр axios
-const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
-  withCredentials: true,
-  headers: { 'Content-Type': 'application/json' },
-})
+async function apiRequest<T>(config: AxiosRequestConfig, opts?: { silent?: boolean; successMessage?: string }) {
+    try {
+        const res = await api.request<T>(config)
 
-// ⚙️ Интерсептор для автоматической очистки перед отправкой
-api.interceptors.request.use((config) => {
-  const method = (config.method || '').toLowerCase()
+        if (opts?.successMessage) {
+            toast.success(opts.successMessage)
+        }
 
-  if (['post', 'put', 'patch'].includes(method)) {
-    if (config.data && typeof config.data === 'object') {
-      cleanDeep(config.data)
+        return res.data
+    } catch (err) {
+        if (!opts?.silent) toast.error(gerErrorMessage(err))
+        throw err
     }
-  }
+}
 
-  return config
-})
-
-export default api
+export default apiRequest;

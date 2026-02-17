@@ -59,7 +59,7 @@ def user_book_exists(session, user_id: UUID, book_id: int) -> bool:
     )
     return session.scalar(stmt)
 
-def insert_book(book, user_id: UUID, year: int):
+def insert_book(book, user_id: UUID):
     with session_factory() as session:
         book_data = book.dict()
 
@@ -82,7 +82,6 @@ def insert_book(book, user_id: UUID, year: int):
             user_id=user_id,
             book_id=book_id,
             personal_rating=book_data.get('personal_rating'),
-            year=year
         )
         session.add(new_user_book)
         session.commit()

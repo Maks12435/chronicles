@@ -2,7 +2,7 @@ import { Separator } from '@radix-ui/react-dropdown-menu'
 import { CheckCircle, Filter, Loader2, Star, XCircle } from 'lucide-react'
 import AddTaskBox from './task_add'
 import { useQuery } from '@tanstack/react-query'
-import type { TaskType } from '@/static/types'
+import type { TaskType } from '@/store/types'
 import { fetchTasks } from '@/api/tasks'
 import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
@@ -11,6 +11,15 @@ import { Label } from '@/components/ui/label'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import TaskBox from './task_box'
 import { motion } from 'framer-motion'
+import {
+    Pagination,
+    PaginationContent,
+    PaginationItem,
+    PaginationLink,
+    PaginationNext,
+    PaginationPrevious,
+} from '@/components/ui/pagination'
+import { Select, SelectContent, SelectTrigger, SelectItem, SelectValue, SelectGroup } from '@/components/ui/select'
 
 export default function TaskStatistics() {
     const {
@@ -27,18 +36,32 @@ export default function TaskStatistics() {
 
     const [filteredTasks, setFilteredTasks] = useState<TaskType[]>([])
     const [filteredStatus, setFilteredStatus] = useState('')
+    const [filteredType, setFilteredType] = useState('')
     const [filteredDifficulty, setFilteredDifficulty] = useState(0)
 
+    const itemsPerPage = 7
+    const [page, setPage] = useState(0)
+    const totalPages = Math.ceil(filteredTasks.length / itemsPerPage)
+    const paginatedTasks = filteredTasks.slice(page * itemsPerPage, (page + 1) * itemsPerPage)
+
     useEffect(() => {
+        let list = tasks
+
         if (filteredStatus) {
-            setFilteredTasks(tasks.filter((t) => t.status === filteredStatus))
+            list = list.filter((t) => t.status === filteredStatus)
         }
+
+        if (filteredType) {
+            list = list.filter((t) => t.type === filteredType)
+        }
+
         if (filteredDifficulty > 0) {
-            setFilteredTasks(tasks.filter((t) => t.difficulty === filteredDifficulty))
-        } else {
-            setFilteredTasks(tasks)
+            list = list.filter((t) => t.difficulty === filteredDifficulty)
         }
-    }, [tasks, filteredStatus, filteredDifficulty])
+
+        setFilteredTasks(list)
+        setPage(0)
+    }, [tasks, filteredStatus, filteredType, filteredDifficulty])
 
     return (
         <>
@@ -77,6 +100,27 @@ export default function TaskStatistics() {
                                                         <Loader2 size={20} className="text-cyan-300" />
                                                     </ToggleGroupItem>
                                                 </ToggleGroup>
+                                            </div>
+                                            <div className="space-x-2">
+                                                <Label htmlFor="type">Type</Label>
+                                                <Select onValueChange={(value) => value === 'all' ? setFilteredType('') : setFilteredType(value)}>
+                                                    <SelectTrigger className="w-[180px]">
+                                                        <SelectValue placeholder="Select task type" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectGroup>
+                                                            <SelectItem value="all">All</SelectItem>
+                                                            <SelectItem value="education">Education</SelectItem>
+                                                            <SelectItem value="sport">Sport</SelectItem>
+                                                            <SelectItem value="self-development">
+                                                                Self-development
+                                                            </SelectItem>
+                                                            <SelectItem value="entertainment">Entertainment</SelectItem>
+                                                            <SelectItem value="24h">24h challenge</SelectItem>
+                                                            <SelectItem value="week">Week challenge</SelectItem>
+                                                        </SelectGroup>
+                                                    </SelectContent>
+                                                </Select>
                                             </div>
                                             <div className="flex flex-col gap-y-2">
                                                 <Label htmlFor="status">Difficulty</Label>
@@ -126,8 +170,8 @@ export default function TaskStatistics() {
                             </div>
                         )}
 
-                        <div className="flex flex-col gap-y-3 max-h-[80vh] overflow-y-scroll px-2 overflow-x-hidden">
-                            {filteredTasks.map((item, index) => (
+                        <div className="flex flex-col gap-y-3 max-h-[80vh] px-2 overflow-x-hidden">
+                            {paginatedTasks.map((item, index) => (
                                 <motion.div
                                     key={index}
                                     initial={{ opacity: 0, x: 200 }}
@@ -137,6 +181,25 @@ export default function TaskStatistics() {
                                     <TaskBox key={index} task={item} refetchTasks={refetchData} />
                                 </motion.div>
                             ))}
+                            <Pagination>
+                                <PaginationContent>
+                                    <PaginationItem>
+                                        <PaginationPrevious></PaginationPrevious>
+                                    </PaginationItem>
+
+                                    {Array.from({ length: totalPages }, (_, i) => (
+                                        <PaginationItem key={i}>
+                                            <PaginationLink isActive={page === i} onClick={() => setPage(i)}>
+                                                {i + 1}
+                                            </PaginationLink>
+                                        </PaginationItem>
+                                    ))}
+
+                                    <PaginationItem>
+                                        <PaginationNext></PaginationNext>
+                                    </PaginationItem>
+                                </PaginationContent>
+                            </Pagination>
                         </div>
                     </div>
                     <div className="col-span-3"></div>

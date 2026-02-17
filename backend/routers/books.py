@@ -23,10 +23,10 @@ def get_books(year: int, request: Request):
     return books.select_books(year, user_id)
 
 @router.post('/add_book')
-def add_book(request: Request, book: Books, year: int = Query(...)):
+def add_book(request: Request, book: Books):
     user_id = get_current_user_id(request)
     try:
-        return books.insert_book(book, user_id, year)
+        return books.insert_book(book, user_id)
     except ValueError as e:
         raise HTTPException(status_code=409, detail=str(e))
 

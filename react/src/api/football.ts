@@ -1,12 +1,10 @@
-import { FOOTBALL_ROUTE_URL } from '@/static/urls'
-import axios from 'axios'
+import type { FootballMatchType, LeagueTableType } from '@/store/types'
+import apiRequest from './axios'
 
 export const fetchMatches = async () => {
-    const response = await axios.get(`${FOOTBALL_ROUTE_URL}/get_matches`)
-    return response.data
+    return await apiRequest<FootballMatchType[]>({ url: `football/get_matches`, method: 'GET' }, { silent: true })     
 }
 
 export const fetchTable = async (league_name: string) => {
-    const response = await axios.get(`${FOOTBALL_ROUTE_URL}/get_table?league_name=${league_name}`)
-    return response.data
+    return await apiRequest<LeagueTableType[]>({ url: `football/get_table?league_name=${league_name}`, method: 'GET' }, { silent: true })
 }

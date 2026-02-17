@@ -1,8 +1,6 @@
 import {
     NavigationMenu,
     NavigationMenuItem,
-    NavigationMenuContent,
-    NavigationMenuTrigger,
     NavigationMenuLink,
     NavigationMenuList,
 } from '../../ui/navigation-menu'
@@ -15,22 +13,22 @@ export default function Navbar() {
             <NavigationMenu>
                 <NavigationMenuList>
                     <NavigationMenuItem>
-                        <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                        <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
                             <Link to="/profile">Home</Link>
                         </NavigationMenuLink>
                     </NavigationMenuItem>
                     <NavigationMenuItem>
-                        <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                        <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
                             <Link to="/diary">Diary</Link>
                         </NavigationMenuLink>
                     </NavigationMenuItem>
                     <NavigationMenuItem>
-                        <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                        <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
                             <Link to="/tasks">Tasks</Link>
                         </NavigationMenuLink>
                     </NavigationMenuItem>
                     <NavigationMenuItem>
-                        <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                        <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
                             <Link to="chronics">Interests</Link>
                         </NavigationMenuLink>
                     </NavigationMenuItem>

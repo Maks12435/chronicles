@@ -2,7 +2,7 @@ import MainPieChart from '@/components/custom/charts/main_piechart'
 import YearCalendar from '@/components/custom/charts/yaer_calendar'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
-import { useUser } from '@/store/userInfo'
+import { useUser } from '@/store/global-variables'
 import {
     Book,
     CalendarDays,
@@ -26,7 +26,7 @@ export default function Profile() {
 
     return (
         <div
-            className="flex justify-center items-center w-screen bg-cover bg-center"
+            className="flex justify-center items-center"
             style={{ backgroundImage: "url('/assets/images/background.jpg')" }}
         >
             <div className="container py-8">

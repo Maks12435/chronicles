@@ -68,6 +68,7 @@ export type MovieType = {
 	personal_rating: number 
     rating: number 
     image: string 
+    addition_date: string
 }
 
 export type SeriesType = {
@@ -86,6 +87,7 @@ export type SeriesType = {
     episodes_count: number
     season_overview: string
     season_poster: string
+    addition_date: string
 }
 
 export type YearData = {

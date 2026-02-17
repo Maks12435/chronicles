@@ -3,7 +3,7 @@ import { Card, CardAction, CardContent, CardDescription, CardFooter, CardHeader,
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useState } from 'react'
-import type { UserType } from '@/static/types'
+import type { UserType } from '@/store/types'
 import { handleRegister } from '@/api/auth'
 import toast from 'react-hot-toast'
 import { Link } from '@tanstack/react-router'

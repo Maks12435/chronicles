@@ -10,9 +10,9 @@ import {
 import { Button } from '@/components/ui/button'
 import { useState } from 'react'
 import { Label } from '@/components/ui/label'
-import { type BookType } from '@/static/types'
+import { type BookType } from '@/store/types'
 import { handleBookAdd, handleBooksearch } from '@/api/books'
-import { useSelectedYearMusic } from '@/store/yearStore'
+import { useSelectedYearBooks } from '@/store/global-variables'
 
 export default function AddBookBox({ refetchBooks }: { refetchBooks: () => void }) {
     const [bookData, setBookData] = useState({
@@ -23,7 +23,7 @@ export default function AddBookBox({ refetchBooks }: { refetchBooks: () => void 
         personal_rating: 0,
     })
     const [openDialog, setOpenDialog] = useState(false)
-    const { selectedYear } = useSelectedYearMusic()
+    const { selectedYear } = useSelectedYearBooks()
     const [findingBook, setFindingBook] = useState<BookType | null>(null)
 
     const handleChange = (field: keyof typeof bookData, value: string | number) => {
@@ -131,7 +131,7 @@ export default function AddBookBox({ refetchBooks }: { refetchBooks: () => void 
                     className="bg-zinc-900 text-primary mt-4"
                     onClick={() => {
                         if (findingBook) {
-                            handleBookAdd(findingBook, selectedYear, refetchBooks)
+                            handleBookAdd(findingBook, refetchBooks)
                             setFindingBook(null)
                         }
                     }}

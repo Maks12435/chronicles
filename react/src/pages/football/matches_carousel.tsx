@@ -9,7 +9,7 @@ import { motion } from 'framer-motion'
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel'
 import { Dot } from 'lucide-react'
 import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table'
-import type { FootballMatchType } from '@/static/types'
+import type { FootballMatchType } from '@/store/types'
 
 export default function MatchesCarousel( {matches} : {matches: FootballMatchType[]}) {
     return (

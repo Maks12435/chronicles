@@ -8,7 +8,7 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
-import { useUser } from '@/store/userInfo'
+import { useUser } from '@/store/global-variables'
 import { ChangePassword, handleDelete, handleLogout } from '@/api/auth'
 import { Dialog, DialogTrigger, DialogContent } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'

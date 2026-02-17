@@ -1,5 +1,5 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import type { LeagueTableType } from '@/static/types'
+import type { LeagueTableType } from '@/store/types'
 import {
     Select,
     SelectValue,
@@ -62,7 +62,7 @@ export default function LeagueTable({
                     </TableHeader>
                     <TableBody>
                         {table.map((item, index) => (
-                            <TableRow>
+                            <TableRow key={index}>
                                 <TableCell>{item.number}</TableCell>
                                 <TableCell>{item.team}</TableCell>
                                 <TableCell className="text-center">{item.tour}</TableCell>

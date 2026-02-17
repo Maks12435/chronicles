@@ -1,5 +1,5 @@
 import { Card, CardContent, CardDescription } from '@/components/ui/card'
-import type { TaskType } from '@/static/types'
+import type { TaskType } from '@/store/types'
 import { CheckCircle, Expand, Loader, Star, Trash, XCircle } from 'lucide-react'
 import { useState } from 'react'
 import TaskUpdate from './task_update'

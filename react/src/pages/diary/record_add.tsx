@@ -20,7 +20,7 @@ import {
     SelectValue,
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
-import type { DiaryType } from '@/static/types'
+import type { DiaryType } from '@/store/types'
 import { useState } from 'react'
 
 export default function RecordAdd({ refetchData }: { refetchData: () => void }) {

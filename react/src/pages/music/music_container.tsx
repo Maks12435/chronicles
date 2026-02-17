@@ -1,32 +1,25 @@
 import { Separator } from '@/components/ui/separator'
 import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table'
-import { ChevronDown, ChevronUp, Edit, Loader2 } from 'lucide-react'
-import { useEffect, useState } from 'react'
-import { type ArtistType, type TrackType } from '@/static/types'
-import {
-    Select,
-    SelectValue,
-    SelectContent,
-    SelectGroup,
-    SelectItem,
-    SelectLabel,
-    SelectTrigger,
-} from '../../components/ui/select'
+import { Edit, Loader2 } from 'lucide-react'
+import { useState } from 'react'
+import { type TrackType } from '@/store/types'
 import { useQuery } from '@tanstack/react-query'
 import { fetchTracks } from '@/api/tracks'
-import { currentYear } from '@/store/storage'
+import { currentYear } from '@/store/global-variables'
 import AddSongBox from '@/pages/music/music_add'
 import GenresChart from '../../components/custom/charts/genres_chart'
 import ArtistChart from '../../components/custom/charts/artists_chart'
 import MusicTable from './music_table'
-import { useSelectedYearMusic } from '@/store/yearStore'
+import { useSelectedYearMusic } from '@/store/global-variables'
 import { getGenresCount } from '../../components/custom/charts/genres_chart'
 import { Button } from '@/components/ui/button'
 import { useMemo } from 'react'
+import Banner, { YearSelection, type BannerConfig } from '@/components/custom/main/interests/header'
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogDescription } from '@/components/ui/dialog'
 
 export default function MusicStatistics() {
     const [editMode, setEditMode] = useState(false)
-    const {selectedYear, setSelectedYear } = useSelectedYearMusic()
+    const { selectedYear, setSelectedYear } = useSelectedYearMusic()
 
     const {
         data: tracks = [],
@@ -40,8 +33,8 @@ export default function MusicStatistics() {
         placeholderData: (previousData) => previousData,
     })
 
-    const { bestArtist, bestRate, artistsList } = useMemo(() => {
-        if (!tracks.length) return { bestArtist: '', bestRate: 0, artistsList: [] }
+    const { bestArtist, bestRate, artistsList, artistRate } = useMemo(() => {
+        if (!tracks.length) return { bestArtist: '', bestRate: 0, artistsList: [], artistRate: {} }
 
         const artistRate = tracks.reduce<Record<string, number>>((acc, obj) => {
             acc[obj.artist] = Number(((acc[obj.artist] || 0) + (1 + 1 / obj.rank)).toFixed(2))
@@ -55,75 +48,83 @@ export default function MusicStatistics() {
         const bestArtist = artistsList[0]?.artist ?? ''
         const bestRate = artistsList[0]?.rate ?? 0
 
-        return { bestArtist, bestRate, artistsList }
+        return { bestArtist, bestRate, artistsList, artistRate }
     }, [tracks])
+
+    const musicBannerConfig: BannerConfig = {
+        title: 'Best artists and music',
+        imagesByYear: {
+            2025: '/assets/images/chaewon2.webp',
+            2024: '/assets/images/chaeyoung.png',
+            default: '/assets/images/Eminem.png',
+        },
+        items: artistsList.map((a) => a.artist),
+    }
 
     return (
         <div className="container">
             <div className="grid grid-cols-10 gap-x-4 relative pt-6">
                 <div className="absolute inset-0 bg-gradient-to-t from-pink-900/20 via-transparent to-transparent pointer-events-none z-20" />
                 <div className="col-span-5">
-                    <div className="relative">
-                        <img
-                            src={
-                                selectedYear === 2025
-                                    ? '/assets/images/chaewon2.webp'
-                                    : selectedYear === 2024
-                                    ? '/assets/images/chaeyoung.png'
-                                    : '/assets/images/Eminem.png'
-                            }
-                            alt="stars"
-                            className="w-full"
-                        />
-
-                        <div className="flex flex-col">
-                            <div className="absolute bottom-0 w-full pb-8" style={{ fontFamily: 'Staatliches' }}>
-                                <h3 className="text-7xl font-bold tracking-wider text-nowrap text-zinc-300">
-                                    Best artists and music
-                                </h3>
-                                <div className="flex gap-x-8">
-                                    {artistsList.slice(0, 6).map((artist, index) => (
-                                        <h4>{artist.artist}</h4>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <Banner year={selectedYear} config={musicBannerConfig} />
                 </div>
                 <div className="col-span-5 tracking-widest text-primary flex flex-col justify-center gap-y-4">
-                    <div className="flex justify-end">
-                        <Select onValueChange={(value) => setSelectedYear(Number(value))}>
-                            <SelectTrigger className="border-none bg-transparent [&>svg]:hidden">
-                                <SelectValue placeholder="Select the year"></SelectValue>
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectGroup>
-                                    <SelectLabel>Years</SelectLabel>
-                                    {Array.from({length: currentYear - 2021}, (_, i) => 2022 + i).map((year) => (
-										<SelectItem value={String(year)}>{year}</SelectItem>
-									))}
-                                </SelectGroup>
-                            </SelectContent>
-                        </Select>
-                    </div>
                     <Table>
                         <TableBody className="text-md">
-                            <TableRow>
-                                <TableCell className="flex gap-x-1">
-                                    <p>Artist of the Year</p>
-                                </TableCell>
-                                <TableCell>
-                                    {bestArtist} ({bestRate} point)
-                                </TableCell>
-                            </TableRow>
-                            <TableRow>
-                                <TableCell className="flex gap-x-1">
-                                    <p>The song of the year</p>
-                                </TableCell>
-                                <TableCell>
-                                    {tracks[0]?.title} - {tracks[0]?.artist}
-                                </TableCell>
-                            </TableRow>
+                            <Dialog>
+                                <DialogTrigger asChild>
+                                    <TableRow>
+                                        <TableCell className="flex gap-x-1">
+                                            <p>Artist of the Year</p>
+                                        </TableCell>
+                                        <TableCell>
+                                            {bestArtist} ({bestRate} point)
+                                        </TableCell>{' '}
+                                    </TableRow>
+                                </DialogTrigger>
+                                <DialogContent>
+                                    <div className="gap-0">
+                                        <DialogHeader>Top 10 best artists of the {selectedYear} year</DialogHeader>
+                                        <DialogDescription>
+                                            point are credited based on rank and number of tracks
+                                        </DialogDescription>
+                                    </div>
+                                    {Object.entries(artistRate)
+                                        .sort((a, b) => b[1] - a[1])
+                                        .slice(0, 10)
+                                        .map(([artist, rate]) => (
+                                            <div key={artist} className="flex justify-between">
+                                                <p>{artist}</p>
+                                                <p>{rate} points</p>
+                                            </div>
+                                        ))}
+                                </DialogContent>
+                            </Dialog>
+
+                            <Dialog>
+                                <DialogTrigger asChild>
+                                    <TableRow>
+                                        <TableCell className="flex gap-x-1">
+                                            <p>The song of the year</p>
+                                        </TableCell>
+                                        <TableCell>
+                                            {tracks[0]?.title} - {tracks[0]?.artist}
+                                        </TableCell>
+                                    </TableRow>
+                                </DialogTrigger>
+                                <DialogContent>
+                                    <div className="flex flex-col items-center p-4">
+                                        <img
+                                            src={tracks[0]?.mid_image}
+                                            alt="track"
+                                            className="rounded-md w-[140px]"
+                                        />
+                                        <h4 className="font-semibold text-xl">{tracks[0]?.title}</h4>
+                                        <h5 className="text-zinc-400">{tracks[0]?.artist}</h5>
+                                    </div>
+                                </DialogContent>
+                            </Dialog>
+
                             <TableRow>
                                 <TableCell className="flex gap-x-1">
                                     <p>The best new artist of the year</p>
@@ -134,7 +135,7 @@ export default function MusicStatistics() {
                                 <TableCell className="flex gap-x-1">
                                     <p>Clip of the year</p>
                                 </TableCell>
-                                <TableCell></TableCell>
+                                <TableCell>Aespa - Rich Man</TableCell>
                             </TableRow>
                         </TableBody>
                     </Table>
@@ -149,11 +150,9 @@ export default function MusicStatistics() {
                             Top 30 best songs of this year
                         </h3>
                         <div className="px-2 flex items-center gap-x-2">
+                            <YearSelection setSelectedYear={setSelectedYear} />
                             <AddSongBox refetchTracks={refetchTracks} />
-                            <button
-                                onClick={() => setEditMode(!editMode)}
-                                disabled={currentYear > selectedYear}
-                            >
+                            <button onClick={() => setEditMode(!editMode)} disabled={currentYear > selectedYear}>
                                 <Edit
                                     className={currentYear > selectedYear ? 'w-5 text-zinc-500' : 'w-5'}
                                     strokeWidth={2}
@@ -190,7 +189,7 @@ export default function MusicStatistics() {
                     <Separator className="h-[1px] bg-zinc-800 my-2 mb-4" />
 
                     <div className="flex flex-col gap-y-4">
-                        <GenresChart genres={getGenresCount(tracks)} />
+                        <GenresChart genres={getGenresCount(tracks)} colorScheme={'red'} />
                         <ArtistChart data={tracks} />
                     </div>
                 </div>

@@ -1,76 +1,42 @@
 import axios from 'axios'
-import { AUTH_ROUTE_URL } from '@/static/urls'
-import type { UserType } from '@/static/types'
+import { BASE_URL } from '@/store/global-variables'
+import type { UserType } from '@/store/types'
 import toast from 'react-hot-toast'
-import { useUser } from '@/store/userInfo'
-import { redirect } from '@tanstack/react-router'
+import { useUser } from '@/store/global-variables'
+import apiRequest from './axios'
 
 export const handleRegister = async (creds: UserType) => {
-    try {
-        await axios.post(`${AUTH_ROUTE_URL}/register`, creds)
-        toast.success('user successfully registered')
-    } catch (error: any) {
-        if (error.response) {
-            toast.error(error.response.data.detail)
-        } else {
-            toast.error(error.message)
-        }
-    }
+    apiRequest(
+        { url: 'auth/register', method: 'POST', data: creds },
+        { successMessage: 'user successfully registered' }
+    )
 }
 
 export const handleLogin = async (creds: { email: string; password: string }) => {
-    try {
-        await axios.post(`${AUTH_ROUTE_URL}/login`, creds, {
-            headers: { 'Content-Type': 'application/json' },
-            withCredentials: true,
-        })
-        toast.success('user successfully loged in')
-        // После успешного логина проверяем авторизацию
-        const checkResponse = await axios.get(`${AUTH_ROUTE_URL}/check`, {
-            withCredentials: true,
-        })
-        if (checkResponse.data) {
-            useUser.getState().setUser(checkResponse.data)
-        }
-    } catch (error: any) {
-        if (error.response) {
-            toast.error(error.response.data.detail)
-        } else {
-            toast.error(error.message)
-        }
-    }
+    await apiRequest(
+        { url: 'auth/login', method: 'POST', data: creds },
+        { successMessage: 'user successfully logged in' }
+    )
+
+    const checkResponse = await apiRequest<UserType>({ url: 'auth/check', method: 'GET' })
+
+    useUser.getState().setUser(checkResponse)
 }
 
 export const handleLogout = async () => {
-    try {
-        await axios.post(`${AUTH_ROUTE_URL}/logout`, {}, { withCredentials: true })
-        useUser.getState().setUser(null)
-        window.location.href = '/auth/login'
-    } catch (error: any) {
-        if (error.response) {
-            toast.error(error.response.data.detail)
-        } else {
-            toast.error(error.message)
-        }
-    }
+    await apiRequest({ url: 'auth/logout', method: 'POST' }, { successMessage: 'user successfully logged out' })
+    useUser.getState().setUser(null)
+    window.location.href = '/auth/login'
 }
 
 export const handleDelete = async () => {
-    try {
-        await axios.post(`${AUTH_ROUTE_URL}/delete_account`, {}, { withCredentials: true })
-        useUser.getState().setUser(null)
-        window.location.href = '/auth/login'
-    } catch (error: any) {
-        if (error.response) {
-            toast.error(error.response.data.detail)
-        } else {
-            toast.error(error.message)
-        }
-    }
+    await apiRequest({ url: 'auth/delete_account', method: 'POST' }, { successMessage: 'account successfully deleted' })
+    useUser.getState().setUser(null)
+    window.location.href = '/auth/login'
 }
 
 export const handleGoogleLogin = () => {
-    window.location.href = `${AUTH_ROUTE_URL}/login/google`
+    window.location.href = `${BASE_URL}/auth/login/google`
 }
 
 export const ChangePassword = async (prevPass: string, newPass: string, confirmPass: string) => {
@@ -81,26 +47,8 @@ export const ChangePassword = async (prevPass: string, newPass: string, confirmP
         return toast.error('New password must be different from the previous one')
     }
 
-    try {
-        await axios.post(
-            `${AUTH_ROUTE_URL}/change_password`,
-            { prevPass, newPass },
-            {
-                headers: { 'Content-Type': 'application/json' },
-                withCredentials: true,
-            }
-        )
-
-        toast.success('Password successfully changed')
-    } catch (error: any) {
-        const detail = error.response?.data?.detail
-
-        if (Array.isArray(detail)) {
-            toast.error(detail[0].msg)
-        } else if (typeof detail === 'string') {
-            toast.error(detail)
-        } else {
-            toast.error(error.message || 'An unexpected error occurred')
-        }
-    }
+    apiRequest(
+        { url: 'auth/change_password', method: 'POST', data: { prevPass, newPass } },
+        { successMessage: 'Password successfully changed' }
+    )
 }

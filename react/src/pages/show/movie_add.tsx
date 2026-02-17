@@ -10,7 +10,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { useState } from 'react'
-import type { MovieType } from '@/static/types'
+import type { MovieType } from '@/store/types'
 import { Loader2, Search } from 'lucide-react'
 import { handleMovieAdd, handleMovieSearch } from '@/api/shows'
 

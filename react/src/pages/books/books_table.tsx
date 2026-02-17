@@ -6,17 +6,16 @@ import {
     PaginationNext,
     PaginationPrevious,
 } from '../../components/ui/pagination'
-import { Table, TableBody, TableCell, TableHead, TableHeader } from '@/components/ui/table'
-import { currentYear } from '@/store/storage'
-import type { BookType } from '@/static/types'
-import { useSelectedYearBooks } from '@/store/yearStore'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { currentYear } from '@/store/global-variables'
+import type { BookType } from '@/store/types'
+import { useSelectedYearBooks } from '@/store/global-variables'
 import { motion } from 'framer-motion'
-import { ChevronDown, ChevronUp, Clock, Repeat, Trash2 } from 'lucide-react'
+import { Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { handleDelete } from '@/api/books'
-import { updateRating } from '@/api/books'
 import UpdateRating from './update_rating'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog'
 
 export default function BooksTable({
     refreshData,
@@ -45,18 +44,20 @@ export default function BooksTable({
         <>
             <Table className="overflow-hidden">
                 <TableHeader>
-                    <TableHead>#</TableHead>
-                    <TableHead>Название</TableHead>
-                    <TableHead>Автор</TableHead>
-                    <TableHead>Дата выхода</TableHead>
-                    <TableHead className="text-end">Рейтинг</TableHead>
-                    {editMode && currentYear <= parseInt(selectedYear) && (
-                        <>
-                            <TableHead>
-                                <Trash2 className="w-4" />
-                            </TableHead>
-                        </>
-                    )}
+                    <TableRow>
+                        <TableHead>#</TableHead>
+                        <TableHead>Название</TableHead>
+                        <TableHead>Автор</TableHead>
+                        <TableHead>Дата выхода</TableHead>
+                        <TableHead className="text-end">Рейтинг</TableHead>
+                        {editMode && currentYear <= selectedYear && (
+                            <>
+                                <TableHead>
+                                    <Trash2 className="w-4" />
+                                </TableHead>
+                            </>
+                        )}
+                    </TableRow>
                 </TableHeader>
                 <TableBody>
                     {paginatedData.map((book, index) => (
@@ -111,13 +112,13 @@ export default function BooksTable({
                                         </div>
                                     </div>
                                 </TableCell>
-                                {editMode && currentYear <= parseInt(selectedYear) && (
+                                {editMode && currentYear <= selectedYear && (
                                     <>
                                         <TableCell>
                                             <Trash2
                                                 className="text-red-500 hover:text-red-700 cursor-pointer w-4"
                                                 onClick={async (e) => {
-													e.stopPropagation()
+                                                    e.stopPropagation()
                                                     await handleDelete(book.id)
                                                     refreshData()
                                                 }}
@@ -134,7 +135,7 @@ export default function BooksTable({
             <Dialog open={open} onOpenChange={setOpen}>
                 {selectedBook && (
                     <>
-                        <DialogContent className='min-w-2xl'>
+                        <DialogContent className="min-w-2xl">
                             <div className="flex gap-x-2">
                                 <img
                                     src={selectedBook.image || 'assets/images/question.jpeg'}
@@ -151,14 +152,14 @@ export default function BooksTable({
                                             <p>Price: {selectedBook.price}</p>
                                             <p>Average_rating: {selectedBook.average_rating}</p>
                                             <p>Personal_rating: {selectedBook.personal_rating}</p>
-											<p>Language: {selectedBook.language}</p>
+                                            <p>Language: {selectedBook.language}</p>
                                             <p>Country: {selectedBook.country}</p>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                             <div className="flex flex-col gap-x-2">
-								<h3>Description:</h3>
+                                <h3>Description:</h3>
                                 <DialogDescription>{selectedBook.description || 'No description'}</DialogDescription>
                             </div>
                         </DialogContent>

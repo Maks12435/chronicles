@@ -2,7 +2,7 @@ import { Separator } from '@/components/ui/separator'
 import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table'
 import { ChevronDown, ChevronUp, Edit, Loader2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { type ArtistType, type BookType, type TrackType } from '@/static/types'
+import { type ArtistType, type BookType, type TrackType } from '@/store/types'
 import {
     Select,
     SelectValue,
@@ -12,19 +12,18 @@ import {
     SelectLabel,
     SelectTrigger,
 } from '../../components/ui/select'
-import { FootballTotal, musicTotal } from '@/static/localdb'
 import { useQuery } from '@tanstack/react-query'
 import { fetchBooks } from '@/api/books'
-import { currentYear } from '@/store/storage'
-import AddbookBox from '@/pages/music/music_add'
-import { useSelectedYearMusic } from '@/store/yearStore'
+import { currentYear } from '@/store/global-variables'
+import { useSelectedYearBooks } from '@/store/global-variables'
 import { Button } from '@/components/ui/button'
 import BooksTable from './books_table'
 import AddBookBox from './book_add'
+import { YearSelection } from '@/components/custom/main/interests/header'
 
 export default function BooksStatistics() {
     const [editMode, setEditMode] = useState(false)
-    const { selectedYear, setSelectedYear } = useSelectedYearMusic()
+    const { selectedYear, setSelectedYear } = useSelectedYearBooks()
 
     const {
         data: books = [],
@@ -42,30 +41,15 @@ export default function BooksStatistics() {
         <div className="container">
             <div className="grid grid-cols-10 gap-x-4 relative pt-6">
                 <div className="col-span-5 tracking-widest text-primary flex flex-col justify-center gap-y-4">
-                    <div className="flex">
-                        <Select onValueChange={(value) => setSelectedYear(value)}>
-                            <SelectTrigger className="border-none bg-transparent [&>svg]:hidden">
-                                <SelectValue placeholder="Select the year"></SelectValue>
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectGroup>
-                                    <SelectLabel>Years</SelectLabel>
-                                    <SelectItem value="2025">2025</SelectItem>
-                                    <SelectItem value="2024">2024</SelectItem>
-                                    <SelectItem value="2023">2023</SelectItem>
-                                </SelectGroup>
-                            </SelectContent>
-                        </Select>
-                    </div>
                     <Table>
                         <TableBody className="text-md">
                             <TableRow>
                                 <TableCell>Book of the year</TableCell>
-                                <TableCell>{FootballTotal[selectedYear].team}</TableCell>
+                                <TableCell>The fault of our stars</TableCell>
                             </TableRow>
                             <TableRow>
                                 <TableCell>Author of the year</TableCell>
-                                <TableCell>{FootballTotal[selectedYear].player}</TableCell>
+                                <TableCell>John Green</TableCell>
                             </TableRow>
                         </TableBody>
                     </Table>
@@ -75,11 +59,13 @@ export default function BooksStatistics() {
                     <div className="relative">
                         <img
                             src={
-                                selectedYear === '2025'
+                                selectedYear === 2026
                                     ? '/assets/images/books.png'
-                                    : selectedYear === '2024'
-                                    ? '/assets/images/books.png'
-                                    : 'none'
+                                    : selectedYear === 2025
+                                      ? '/assets/images/books.png'
+                                      : selectedYear === 2024
+                                        ? '/assets/images/books.png'
+                                        : 'none'
                             }
                             alt="stars"
                             className="w-full"
@@ -116,13 +102,11 @@ export default function BooksStatistics() {
                             Top 30 best books of this year
                         </h3>
                         <div className="flex items-center gap-x-2">
+                            <YearSelection setSelectedYear={setSelectedYear} />
                             <AddBookBox refetchBooks={refetchBooks} />
-                            <button
-                                onClick={() => setEditMode(!editMode)}
-                                disabled={currentYear > parseInt(selectedYear)}
-                            >
+                            <button onClick={() => setEditMode(!editMode)} disabled={currentYear > selectedYear}>
                                 <Edit
-                                    className={currentYear > parseInt(selectedYear) ? 'w-5 text-zinc-500' : 'w-5'}
+                                    className={currentYear > selectedYear ? 'w-5 text-zinc-500' : 'w-5'}
                                     strokeWidth={2}
                                 />
                             </button>

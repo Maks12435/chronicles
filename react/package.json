@@ -33,6 +33,7 @@
     "embla-carousel-react": "^8.6.0",
     "framer-motion": "^12.23.0",
     "lucide-react": "^0.515.0",
+    "radix-ui": "^1.4.3",
     "react": "^19.1.0",
     "react-countup": "^6.5.3",
     "react-dom": "^19.1.0",
@@ -58,6 +59,5 @@
     "typescript": "~5.8.3",
     "typescript-eslint": "^8.30.1",
     "vite": "^6.3.5"
-  },
-  "packageManager": "yarn@1.22.19+sha512.ff4579ab459bb25aa7c0ff75b62acebe576f6084b36aa842971cf250a5d8c6cd3bc9420b22ce63c7f93a0857bc6ef29291db39c3e7a23aab5adfd5a4dd6c5d71"
+  }
 }

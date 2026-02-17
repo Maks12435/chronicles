@@ -7,8 +7,7 @@ import Navbar from './components/custom/navbar/Navbar'
 import UserProfileMenu from './components/custom/navbar/UserProfileMenu'
 import { Gem } from 'lucide-react'
 import axios from 'axios'
-import { AUTH_ROUTE_URL } from './static/urls'
-import { useUser } from './store/userInfo'
+import { useUser } from './store/global-variables'
 import Profile from './pages/profile'
 import MusicStatistics from './pages/music/music_container'
 import FootballStatistics from './pages/football/football_container'
@@ -17,6 +16,10 @@ import Chronics from './pages/chronics'
 import Footer from './components/custom/footer/footer'
 import BooksStatistics from './pages/books/books_container'
 import Diary from './pages/diary/diary'
+import apiRequest from './api/axios'
+import type { UserType } from './store/types'
+import { SidebarProvider } from './components/ui/sidebar'
+import { AppSidebar } from './components/custom/main/sidebar'
 
 const rootRoute = createRootRoute({
     component: App,
@@ -32,55 +35,50 @@ const privateRoute = createRoute({
     path: '/',
     getParentRoute: () => rootRoute,
     component: () => (
-        <div className="flex flex-col min-h-screen">
-            {/* Header */}
-            <header className="flex justify-between items-center p-4 border-b-2 border-zinc-800">
-                <div className="flex items-center gap-x-1">
-                    <Gem />
-                    <h4>Chronicles</h4>
+        <SidebarProvider>
+            <div className="flex min-h-screen w-full">
+                <AppSidebar />
+
+                <div className="flex flex-1 flex-col min-h-screen">
+                    <header className="flex justify-between items-center p-4 border-b-2 border-zinc-800">
+                        <div className="flex items-center gap-x-1">
+                            <Gem />
+                            <h4>Chronicles</h4>
+                        </div>
+                        <Navbar />
+                        <UserProfileMenu />
+                    </header>
+
+                    <main className="flex-1">
+                        <div className="flex justify-center flex-1">
+                            <Outlet />
+                        </div>
+                    </main>
+
+                    <footer className="bg-zinc-950 border-t border-zinc-800 text-zinc-300">
+                        <Footer />
+                    </footer>
                 </div>
-                <Navbar />
-                <UserProfileMenu />
-            </header>
-
-            {/* Main Content */}
-            <main className="flex justify-center flex-1">
-                <Outlet />
-            </main>
-
-            {/* Footer */}
-            <footer className="bg-zinc-950 border border-t-zinc-800 text-zinc-300">
-                <Footer />
-            </footer>
-        </div>
+            </div>
+        </SidebarProvider>
     ),
     beforeLoad: async () => {
         const state = useUser.getState()
-        
+
         if (state.user) {
             return
         }
 
         try {
-            const response = await axios.get(`${AUTH_ROUTE_URL}/check`, {
-                withCredentials: true,
-            })
-            state.setUser(response.data)
+            const response = await apiRequest<UserType>({ url: `auth/check`, method: 'GET' }, { silent: true })
+            state.setUser(response)
         } catch (error: any) {
             if (error.response?.status === 401) {
                 try {
-                    await axios.post(
-                        `${AUTH_ROUTE_URL}/refresh`,
-                        {},
-                        {
-                            withCredentials: true,
-                        }
-                    )
+                    await apiRequest({ url: 'auth/refresh', method: 'POST' }, { silent: true })
 
-                    const response = await axios.get(`${AUTH_ROUTE_URL}/check`, {
-                        withCredentials: true,
-                    })
-                    state.setUser(response.data)
+                    const response = await apiRequest<UserType>({ url: `auth/check`, method: 'GET' }, { silent: true })
+                    state.setUser(response)
                 } catch {
                     throw redirect({ to: '/auth/login' })
                 }

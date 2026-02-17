@@ -1,18 +1,9 @@
 import { Separator } from '@/components/ui/separator'
 import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table'
-import { ChevronDown, ChevronUp, Edit, Loader2 } from 'lucide-react'
-import type { MovieType, SeriesType } from '@/static/types'
-import {
-    Select,
-    SelectValue,
-    SelectContent,
-    SelectGroup,
-    SelectItem,
-    SelectLabel,
-    SelectTrigger,
-} from '../../components/ui/select'
+import { Edit, Loader2 } from 'lucide-react'
+import type { MovieType, SeriesType } from '@/store/types'
 import { fetchMovies, fetchSeries } from '@/api/shows'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import GenresChart from '../../components/custom/charts/genres_chart'
 import AddMovie from './movie_add'
@@ -24,11 +15,12 @@ import { getGenresCount } from '../../components/custom/charts/genres_chart'
 import { getAverageRatings } from '../../components/custom/charts/average_rating'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { currentYear } from '@/store/storage'
+import { useSelectedYearShows } from '@/store/global-variables'
+import Banner, { YearSelection, type BannerConfig } from '@/components/custom/main/interests/header'
 
 export default function ShowContainer() {
     const [editMode, setEditMode] = useState(false)
-    const [selectedYear, setSelectedYear] = useState(currentYear)
+    const { selectedYear, setSelectedYear } = useSelectedYearShows()
     const [type, setType] = useState('movies')
 
     const {
@@ -55,63 +47,60 @@ export default function ShowContainer() {
         placeholderData: (prev) => prev,
     })
 
+    const { bestMovie, bestSeries, MovieList } = useMemo(() => {
+        if (!movies.length) return { bestArtist: '', bestMovieRate: 0, MovieList: [] }
+
+        const MovieRate = movies.reduce<Record<string, number>>((acc, obj) => {
+            acc[obj.original_title] = Number(((acc[obj.original_title] || 0) + obj.personal_rating).toFixed(2))
+            return acc
+        }, {})
+
+        const MovieList = Object.entries(MovieRate)
+            .map(([original_title, rating]) => ({ original_title, rating }))
+            .sort((a, b) => b.rating - a.rating)
+
+        const bestMovie = MovieList[0]?.original_title ?? ''
+        const bestMovieRate = MovieList[0]?.rating ?? 0
+        const bestSeries = series[0]?.original_title ?? ''
+        const bestSeriesRate = series.length > 0 ? Math.max(...series.map((item) => item.personal_rating)) : 0
+
+        return { bestMovie, bestSeries, bestMovieRate, bestSeriesRate, MovieList }
+    }, [movies, series])
+
+    const showBannerConfig: BannerConfig = {
+        title: 'Best movies and series',
+        imagesByYear: {
+            2025: '/assets/images/movies.png',
+            2024: '/assets/images/movies.webp',
+            default: '/assets/images/movies.webp',
+        },
+        items: MovieList.map((a) => a.original_title),
+        maxItems: 5,
+    }
+
     return (
         <div className="container">
             <div className="grid grid-cols-10 gap-x-4 relative pt-6">
                 <div className="absolute inset-0 bg-gradient-to-t from-cyan-900/20 via-transparent to-transparent pointer-events-none z-20" />
                 <div className="col-span-5">
-                    <div className="relative">
-                        <img
-                            src={
-                                selectedYear === 2025
-                                    ? '/assets/images/movies.png'
-                                    : selectedYear === 2024
-                                    ? '/assets/images/movies.webp'
-                                    : '/assets/images/movies.webp'
-                            }
-                            alt="stars"
-                            className="w-full"
-                        />
-                        <div className="flex flex-col">
-                            <div className="absolute bottom-0 w-full pb-8" style={{ fontFamily: 'Staatliches' }}>
-                                <h3 className="text-7xl font-bold movieing-wider text-nowrap text-zinc-300">
-                                    Best movies and series
-                                </h3>
-                                <div className="flex gap-x-8">
-                                    <h4>Breaking bad</h4>
-                                    <h4>Squid game 2</h4>
-                                    <h4>Green elephant</h4>
-                                    <h4>parasite</h4>
-                                </div>
-                            </div>
-                        </div>
+                    <div className="col-span-5">
+                        <Banner year={selectedYear} config={showBannerConfig} />
                     </div>
                 </div>
                 <div className="col-span-5 movieing-widest text-primary flex flex-col justify-center gap-y-4">
-                    <div className="flex justify-end">
-                        <Select onValueChange={(value) => setSelectedYear(Number(value))}>
-                            <SelectTrigger className="border-none bg-transparent [&>svg]:hidden">
-                                <SelectValue placeholder="Select the year"></SelectValue>
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectGroup>
-                                    <SelectLabel>Years</SelectLabel>
-									{Array.from({length: currentYear - 2021}, (_, i) => 2022 + i).map((year) => (
-										<SelectItem value={String(year)}>{year}</SelectItem>
-									))}
-                                </SelectGroup>
-                            </SelectContent>
-                        </Select>
-                    </div>
                     <Table>
                         <TableBody className="text-md">
                             <TableRow>
                                 <TableCell>Movie of the year</TableCell>
-                                <TableCell>Parasite</TableCell>
+                                <TableCell>
+                                    {bestMovie} 
+                                </TableCell>
                             </TableRow>
                             <TableRow>
                                 <TableCell>Series of the year</TableCell>
-                                <TableCell>Breaking bad</TableCell>
+                                <TableCell>
+                                    {bestSeries} 
+                                </TableCell>
                             </TableRow>
                             <TableRow>
                                 <TableCell>Character of thr year</TableCell>
@@ -129,6 +118,8 @@ export default function ShowContainer() {
                             List of the best movies of this year
                         </h3>
                         <div className="px-1 flex items-center gap-x-2 pb-2">
+                            <YearSelection setSelectedYear={setSelectedYear} />
+
                             {type === 'movies' ? (
                                 <AddMovie refetchMovies={refetchMovies} />
                             ) : (
@@ -137,16 +128,8 @@ export default function ShowContainer() {
 
                             <Tabs value={type} onValueChange={setType}>
                                 <TabsList>
-                                    <TabsTrigger
-                                        value="movies"
-                                    >
-                                        Movies
-                                    </TabsTrigger>
-                                    <TabsTrigger
-                                        value="series"
-                                    >
-                                        Series
-                                    </TabsTrigger>
+                                    <TabsTrigger value="movies">Movies</TabsTrigger>
+                                    <TabsTrigger value="series">Series</TabsTrigger>
                                 </TabsList>
                             </Tabs>
 

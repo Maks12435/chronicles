@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
-import type { AvgRating } from '@/static/types'
+import type { AvgRating } from '@/store/types'
 import CountUp from "react-countup";
 
 export function getAverageRatings<T extends { rating: number; personal_rating: number }>(items: T[]) {
